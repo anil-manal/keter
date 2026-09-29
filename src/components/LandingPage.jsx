@@ -13,11 +13,7 @@ import {
   ChevronUp,
   Volume2,
   Folder,
-  Layers,
   ArrowRight,
-  ExternalLink,
-  Sliders,
-  AlertTriangle,
   Sparkles,
   Mail,
   Monitor,
@@ -120,12 +116,11 @@ const FAQ_ITEMS = [
   },
 ];
 
-export function LandingPage({ onOpenApp }) {
+export function LandingPage() {
   const [activePreset, setActivePreset] = useState('technical');
   const [simText, setSimText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState(0);
-  const [simViewMode, setSimViewMode] = useState('laptop'); // 'laptop' | 'mobile'
   const [phoneViewMode, setPhoneViewMode] = useState('mirror'); // 'mirror' | 'prompter'
 
   const currentPresetData = SIMULATOR_PRESETS[activePreset];
@@ -166,9 +161,8 @@ export function LandingPage({ onOpenApp }) {
 
   return (
     <div className="landing-container">
-      {/* Background glow effects */}
-      <div className="landing-bg-glow-1" />
-      <div className="landing-bg-glow-2" />
+      {/* Subtle Technical Grid Background */}
+      <div className="landing-grid-bg" />
 
       {/* Navigation */}
       <nav className="landing-nav">
@@ -179,48 +173,37 @@ export function LandingPage({ onOpenApp }) {
           className="landing-logo"
           style={{ cursor: 'pointer' }}
         >
-          <div
-            style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '9px',
-              background: 'linear-gradient(135deg, #00f2fe 0%, #7c3aed 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 15px rgba(0, 242, 254, 0.4)',
-            }}
-          >
-            <Shield size={18} color="#040d1a" strokeWidth={2.5} />
+          <div className="logo-icon-box">
+            <Shield size={18} color="#ffffff" strokeWidth={2.2} />
           </div>
-          <span style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '-0.5px' }}>
+          <span style={{ fontSize: '17px', fontWeight: '800', letterSpacing: '-0.02em', color: '#0f172a' }}>
             KETER
           </span>
           <span className="logo-badge">STEALTH COPILOT</span>
         </div>
 
         <div className="landing-nav-links">
-          <button type="button" onClick={() => scrollTo('simulator')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '14px', fontWeight: 500 }}>
+          <button type="button" onClick={() => scrollTo('simulator')} className="nav-link-btn">
             Live Simulator
           </button>
-          <button type="button" onClick={() => scrollTo('stealth')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '14px', fontWeight: 500 }}>
+          <button type="button" onClick={() => scrollTo('stealth')} className="nav-link-btn">
             Stealth Matrix
           </button>
-          <button type="button" onClick={() => scrollTo('features')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '14px', fontWeight: 500 }}>
+          <button type="button" onClick={() => scrollTo('features')} className="nav-link-btn">
             Features
           </button>
-          <button type="button" onClick={() => scrollTo('pricing')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '14px', fontWeight: 500 }}>
+          <button type="button" onClick={() => scrollTo('pricing')} className="nav-link-btn">
             Pricing (₹99)
           </button>
-          <button type="button" onClick={() => scrollTo('faq')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '14px', fontWeight: 500 }}>
+          <button type="button" onClick={() => scrollTo('faq')} className="nav-link-btn">
             FAQ
           </button>
-          <button type="button" onClick={() => scrollTo('contact')} style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
+          <button type="button" onClick={() => scrollTo('contact')} className="nav-link-btn highlight">
             Contact
           </button>
         </div>
 
-        <div className="landing-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div className="landing-nav-actions">
           <button type="button" onClick={handleDownload} className="btn-primary-gradient">
             <Download size={14} /> Download for Windows
           </button>
@@ -230,13 +213,13 @@ export function LandingPage({ onOpenApp }) {
       {/* Hero Section */}
       <header className="landing-hero">
         <div className="hero-pill">
-          <Shield size={13} color="#38bdf8" />
+          <span className="hero-pill-status" />
           <span>100% Invisible on Screen Shares • Works with Zoom, Teams & Meet</span>
         </div>
 
         <h1 className="hero-title">
           Ace Every Technical & Behavioral Interview in{' '}
-          <span className="hero-gradient-text">Real-Time.</span>
+          <span className="hero-accent-text">Real-Time.</span>
         </h1>
 
         <p className="hero-subtitle">
@@ -245,28 +228,28 @@ export function LandingPage({ onOpenApp }) {
 
         <div className="hero-ctas">
           <button type="button" onClick={handleDownload} className="btn-hero-download">
-            <Download size={18} />
-            <span>Download for Windows 10/11</span>
+            <Download size={17} />
+            <span>Download for Windows 10 / 11</span>
           </button>
 
           <button type="button" onClick={() => scrollTo('simulator')} className="btn-hero-secondary">
-            <Play size={16} color="#38bdf8" />
+            <Play size={15} color="#2563eb" />
             <span>Test Live Simulator</span>
           </button>
         </div>
 
         <div className="hero-badges-row">
           <div className="hero-badge-item">
-            <EyeOff size={14} color="#38bdf8" /> Screen-Share Invisible
+            <EyeOff size={14} color="#059669" /> Screen-Share Invisible
           </div>
           <div className="hero-badge-item">
-            <Smartphone size={14} color="#c084fc" /> Air-Gapped Mobile Teleprompter
+            <Smartphone size={14} color="#2563eb" /> Air-Gapped Mobile Teleprompter
           </div>
           <div className="hero-badge-item">
-            <Zap size={14} color="#fbbf24" /> Instant Real-Time Prompts
+            <Zap size={14} color="#d97706" /> Instant Real-Time Prompts
           </div>
           <div className="hero-badge-item">
-            <CheckCircle size={14} color="#4ade80" /> 1st Project Free • Then ₹99 / 24h Pass
+            <CheckCircle size={14} color="#059669" /> 1st Project Free • Then ₹99 / 24h Pass
           </div>
         </div>
 
@@ -274,7 +257,7 @@ export function LandingPage({ onOpenApp }) {
         <div className="hero-showcase-container">
           {/* Mode Switcher Tabs right above the devices */}
           <div className="hero-mode-pills">
-            <span className="hero-mode-label">Live Copilot Telemetry:</span>
+            <span className="hero-mode-label">Live Scenario:</span>
             {Object.keys(SIMULATOR_PRESETS).map((key) => {
               const item = SIMULATOR_PRESETS[key];
               const isActive = activePreset === key;
@@ -285,7 +268,7 @@ export function LandingPage({ onOpenApp }) {
                   onClick={() => setActivePreset(key)}
                   className={`hero-mode-btn ${isActive ? 'active' : ''}`}
                 >
-                  <span className={`hero-mode-dot ${isActive ? 'pulse' : ''}`} />
+                  <span className="hero-mode-dot" />
                   {item.title}
                 </button>
               );
@@ -332,15 +315,15 @@ export function LandingPage({ onOpenApp }) {
                       <div className="code-line"><span className="c-comment"># Problem: {currentPresetData.question.substring(0, 55)}...</span></div>
                       <div className="code-line"><span className="c-keyword">class</span> <span className="c-class">InterviewSolution</span>:</div>
                       <div className="code-line indent-1"><span className="c-keyword">def</span> <span className="c-func">solveInterviewProblem</span>(self, input_data):</div>
-                      <div className="code-line indent-2"><span className="c-comment"># Workspace shared with interviewer</span></div>
+                      <div className="code-line indent-2"><span className="c-comment"># Shared desktop screen view</span></div>
                       <div className="code-line indent-2">result = []</div>
                     </div>
 
-                    {/* FLOATING KETER STEALTH HUD (EXCLUDED FROM ZOOM CAPTURE) */}
+                    {/* FLOATING KETER STEALTH HUD (EXCLUDED FROM SCREEN CAPTURE) */}
                     <div className="floating-keter-hud">
                       <div className="hud-window-header">
                         <div className="hud-logo-tag">
-                          <Shield size={12} color="#00f2fe" />
+                          <Shield size={12} color="#2563eb" />
                           <span className="hud-name">KETER INTELLIGENCE</span>
                           <span className="hud-pill">STEALTH HUD</span>
                         </div>
@@ -360,7 +343,7 @@ export function LandingPage({ onOpenApp }) {
                       {/* Transcribed Question Box */}
                       <div className="hud-question-box">
                         <div className="hud-box-header">
-                          <Volume2 size={12} color="#38bdf8" />
+                          <Volume2 size={12} color="#2563eb" />
                           <span>Interviewer Question:</span>
                         </div>
                         <p className="hud-question-text">
@@ -371,7 +354,7 @@ export function LandingPage({ onOpenApp }) {
                       {/* Real-Time Answer Teleprompter */}
                       <div className="hud-teleprompter-box">
                         <div className="hud-box-header">
-                          <Sparkles size={12} color="#c084fc" />
+                          <Sparkles size={12} color="#7c3aed" />
                           <span>Keter Real-Time Teleprompter & Response Strategy:</span>
                         </div>
                         <pre className="hud-code-stream">
@@ -383,13 +366,13 @@ export function LandingPage({ onOpenApp }) {
                       {/* Bottom Stealth Shield Ribbon */}
                       <div className="hud-shield-ribbon">
                         <div className="shield-left">
-                          <Lock size={12} color="#4ade80" />
+                          <Lock size={12} color="#059669" />
                           <span>Stealth Protection Active • Hidden from Interviewer</span>
                         </div>
                         <div className="shield-right">
                           <span className="mode-indicator">{currentPresetData.title}</span>
-                          <span style={{ color: '#64748b' }}>•</span>
-                          <span style={{ color: '#38bdf8' }}>Instant Response</span>
+                          <span style={{ color: '#cbd5e1' }}>•</span>
+                          <span style={{ color: '#0f172a', fontWeight: 600 }}>Instant Response</span>
                         </div>
                       </div>
                     </div>
@@ -410,15 +393,15 @@ export function LandingPage({ onOpenApp }) {
                   {/* Phone Status Bar */}
                   <div className="phone-status-row">
                     <span>9:41</span>
-                    <span style={{ color: '#38bdf8' }}>📶 Encrypted Sync</span>
+                    <span style={{ color: '#059669' }}>🔒 P2P Sync</span>
                     <span>98% 🔋</span>
                   </div>
 
                   {/* Companion Header */}
-                  <div className="phone-hud-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 8px' }}>
+                  <div className="phone-hud-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Smartphone size={11} color="#38bdf8" />
-                      <span style={{ fontSize: '9.5px', fontWeight: 800, color: '#f8fafc' }}>KETER HUD</span>
+                      <Smartphone size={11} color="#2563eb" />
+                      <span style={{ fontSize: '10px', fontWeight: 700, color: '#0f172a' }}>KETER PHONE</span>
                     </div>
 
                     <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
@@ -428,17 +411,17 @@ export function LandingPage({ onOpenApp }) {
                         style={{
                           fontSize: '8px',
                           padding: '2px 5px',
-                          borderRadius: '5px',
-                          border: phoneViewMode === 'mirror' ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.18)',
-                          background: phoneViewMode === 'mirror' ? 'rgba(56, 189, 248, 0.25)' : 'rgba(255,255,255,0.06)',
-                          color: phoneViewMode === 'mirror' ? '#38bdf8' : '#94a3b8',
+                          borderRadius: '4px',
+                          border: phoneViewMode === 'mirror' ? '1px solid #2563eb' : '1px solid #e2e8f0',
+                          background: phoneViewMode === 'mirror' ? '#eff6ff' : '#ffffff',
+                          color: phoneViewMode === 'mirror' ? '#1d4ed8' : '#64748b',
                           cursor: 'pointer',
-                          fontWeight: 700,
+                          fontWeight: 600,
                         }}
                       >
-                        {phoneViewMode === 'mirror' ? '🖥️ Mirror ON' : '🖥️ Mirror'}
+                        {phoneViewMode === 'mirror' ? '🖥️ Mirror' : '📝 Prompter'}
                       </button>
-                      <span className="phone-sync-pill" style={{ fontSize: '8px', padding: '2px 5px' }}>● LIVE</span>
+                      <span className="phone-sync-pill">● LIVE</span>
                     </div>
                   </div>
 
@@ -447,34 +430,33 @@ export function LandingPage({ onOpenApp }) {
                       {/* Live PC Screen Mirror Box (Top) */}
                       <div
                         style={{
-                          margin: '6px 8px 4px 8px',
-                          borderRadius: '7px',
-                          background: '#040711',
-                          border: '1px solid rgba(56, 189, 248, 0.35)',
+                          margin: '4px 0',
+                          borderRadius: '6px',
+                          background: '#f8fafc',
+                          border: '1px solid #e2e8f0',
                           padding: '6px 8px',
                           position: 'relative',
                           overflow: 'hidden',
-                          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.6)',
                         }}
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                          <span style={{ fontSize: '7.5px', fontWeight: 800, color: '#ffffff', background: '#ef4444', padding: '1px 5px', borderRadius: '4px', letterSpacing: '0.04em' }}>
-                            ● LIVE P2P MIRROR
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                          <span style={{ fontSize: '7.5px', fontWeight: 700, color: '#dc2626', background: '#fee2e2', padding: '1px 4px', borderRadius: '3px' }}>
+                            ● PC SCREEN MIRROR
                           </span>
-                          <span style={{ fontSize: '7.5px', color: '#64748b' }}>PC Desktop (0ms)</span>
+                          <span style={{ fontSize: '7.5px', color: '#64748b' }}>0ms Latency</span>
                         </div>
-                        <div style={{ fontFamily: 'monospace', fontSize: '8px', color: '#a5f3fc', lineHeight: 1.3, maxHeight: '50px', overflow: 'hidden' }}>
+                        <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: '8px', color: '#334155', lineHeight: 1.3, maxHeight: '45px', overflow: 'hidden' }}>
                           {currentPresetData.question}
                         </div>
                       </div>
 
                       {/* AI Response Prompter (Bottom) */}
-                      <div className="phone-teleprompter-body" style={{ flex: 1, margin: '2px 8px 6px 8px' }}>
+                      <div className="phone-teleprompter-body">
                         <div className="phone-teleprompter-label">
                           <span style={{ fontSize: '8.5px' }}>AI Prompter (Split View)</span>
                           <span className="scroll-pill" style={{ fontSize: '7.5px' }}>Streaming</span>
                         </div>
-                        <div className="phone-teleprompter-text" style={{ fontSize: '9px', lineHeight: 1.35, maxHeight: '115px' }}>
+                        <div className="phone-teleprompter-text" style={{ fontSize: '9px', lineHeight: 1.35, maxHeight: '120px' }}>
                           {simText}
                           {isTyping && <span className="streaming-cursor">█</span>}
                         </div>
@@ -504,15 +486,15 @@ export function LandingPage({ onOpenApp }) {
 
                   {/* Phone Bottom Control Bar */}
                   <div className="phone-bottom-bar">
-                    Position phone under webcam for 100% natural eye contact
+                    Mount phone under webcam for 100% natural eye contact
                   </div>
                 </div>
               </div>
 
-              {/* Realistic Aluminum Phone Stand Base */}
+              {/* Clean Stand Base */}
               <div className="mobile-stand-neck" />
               <div className="mobile-stand-base">
-                <div className="stand-brand-label">AIR-GAPPED COMPANION STAND</div>
+                <div className="stand-brand-label">COMPANION STAND</div>
               </div>
             </div>
           </div>
@@ -520,15 +502,15 @@ export function LandingPage({ onOpenApp }) {
           {/* Floating Feature Indicators below the showcase */}
           <div className="hero-indicators-bar">
             <div className="indicator-chip">
-              <Shield size={14} color="#4ade80" />
+              <Shield size={14} color="#059669" />
               <span>100% Invisible on Screen Share (Zoom / Teams / Meet)</span>
             </div>
             <div className="indicator-chip">
-              <Smartphone size={14} color="#38bdf8" />
+              <Smartphone size={14} color="#2563eb" />
               <span>Air-Gapped Mobile Teleprompter</span>
             </div>
             <div className="indicator-chip">
-              <Cpu size={14} color="#c084fc" />
+              <Cpu size={14} color="#7c3aed" />
               <span>Instant Voice & Screen Question Capture</span>
             </div>
           </div>
@@ -564,30 +546,13 @@ export function LandingPage({ onOpenApp }) {
                 );
               })}
             </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={() => setSimViewMode('laptop')}
-                className={`sim-mode-btn ${simViewMode === 'laptop' ? 'active' : ''}`}
-              >
-                Laptop HUD
-              </button>
-              <button
-                type="button"
-                onClick={() => setSimViewMode('mobile')}
-                className={`sim-mode-btn ${simViewMode === 'mobile' ? 'active' : ''}`}
-              >
-                <Smartphone size={12} /> Mobile HUD
-              </button>
-            </div>
           </div>
 
           {/* Simulator Content Area */}
           <div className="simulator-content">
             {/* Left Question List */}
             <div className="sim-questions-list">
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
                 Interviewer Audio Input:
               </div>
 
@@ -600,14 +565,14 @@ export function LandingPage({ onOpenApp }) {
                     onClick={() => setActivePreset(key)}
                     className={`sim-q-item ${isActive ? 'active' : ''}`}
                   >
-                    <div style={{ fontSize: '11px', color: isActive ? '#38bdf8' : '#94a3b8', fontWeight: 600 }}>
+                    <div style={{ fontSize: '11px', color: isActive ? '#2563eb' : '#64748b', fontWeight: 600 }}>
                       {item.title}
                     </div>
                     <div
                       style={{
                         fontSize: '12px',
-                        color: '#f8fafc',
-                        marginTop: '4px',
+                        color: '#0f172a',
+                        marginTop: '3px',
                         overflow: 'hidden',
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
@@ -624,14 +589,15 @@ export function LandingPage({ onOpenApp }) {
                 style={{
                   marginTop: 'auto',
                   padding: '12px',
-                  borderRadius: '10px',
-                  backgroundColor: 'rgba(56, 189, 248, 0.05)',
-                  border: '1px solid rgba(56, 189, 248, 0.15)',
+                  borderRadius: '8px',
+                  backgroundColor: '#f1f5f9',
+                  border: '1px solid #e2e8f0',
                   fontSize: '11px',
-                  color: '#94a3b8',
+                  color: '#475569',
+                  lineHeight: 1.45,
                 }}
               >
-                💡 In the desktop app, speech from your headphones is captured automatically via loopback audio with zero manual typing required.
+                💡 In the desktop app, speech from your speakers or headphones is captured automatically with zero manual typing required.
               </div>
             </div>
 
@@ -644,27 +610,26 @@ export function LandingPage({ onOpenApp }) {
                       width: '8px',
                       height: '8px',
                       borderRadius: '50%',
-                      backgroundColor: isTyping ? '#38bdf8' : '#34d399',
-                      boxShadow: isTyping ? '0 0 10px #38bdf8' : '0 0 10px #34d399',
+                      backgroundColor: isTyping ? '#2563eb' : '#10b981',
                     }}
                   />
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#f8fafc' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>
                     {isTyping ? 'Generating AI Teleprompter Stream...' : 'AI Solution Ready'}
                   </span>
                 </div>
 
                 <span style={{ fontSize: '11px', color: '#64748b' }}>
-                  Response Time: <strong>Instant (&lt;0.3s)</strong>
+                  Response Latency: <strong>Instant (&lt;0.3s)</strong>
                 </span>
               </div>
 
               <div className="sim-teleprompter-card">
-                <div style={{ color: '#38bdf8', fontWeight: 700, fontSize: '14px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '8px' }}>
+                <div style={{ color: '#2563eb', fontWeight: 700, fontSize: '13px', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>
                   Q: {currentPresetData.question}
                 </div>
-                <div style={{ whiteSpace: 'pre-wrap', color: '#e2e8f0', flex: 1, overflowY: 'auto' }}>
+                <div style={{ whiteSpace: 'pre-wrap', color: '#0f172a', flex: 1, overflowY: 'auto' }}>
                   {simText}
-                  {isTyping && <span style={{ color: '#00f2fe', animation: 'blink 1s infinite' }}> ▋</span>}
+                  {isTyping && <span style={{ color: '#2563eb' }}> ▋</span>}
                 </div>
               </div>
             </div>
@@ -686,26 +651,26 @@ export function LandingPage({ onOpenApp }) {
           {/* Interviewer View Card */}
           <div className="stealth-card interviewer">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ fontSize: '16px', fontWeight: 800, color: '#f87171', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ fontSize: '15px', fontWeight: 700, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <EyeOff size={18} /> What the Interviewer Sees
               </div>
-              <span style={{ fontSize: '10px', fontWeight: 700, color: '#f87171', padding: '2px 8px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.15)' }}>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#dc2626', padding: '2px 8px', borderRadius: '4px', background: '#fee2e2' }}>
                 ZOOM / TEAMS / MEET
               </span>
             </div>
 
             <div className="stealth-card-mockup">
               <div style={{ textAlign: 'center', color: '#64748b' }}>
-                <div style={{ fontSize: '14px', fontWeight: 600, color: '#94a3b8' }}>
-                  Pristine Clean Desktop
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>
+                  Clean, Standard Desktop
                 </div>
-                <div style={{ fontSize: '11px', marginTop: '4px' }}>
-                  Only your browser or code editor is visible. Keter’s window is completely invisible in your shared screen.
+                <div style={{ fontSize: '12px', marginTop: '4px', color: '#475569', maxWidth: '320px' }}>
+                  Only your browser or code editor is visible. Keter’s window is completely excluded from the shared video buffer.
                 </div>
               </div>
             </div>
 
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#94a3b8' }}>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#475569' }}>
               <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 ✓ Zero overlay or watermarks visible on shared screen
               </li>
@@ -721,24 +686,24 @@ export function LandingPage({ onOpenApp }) {
           {/* Candidate View Card */}
           <div className="stealth-card candidate">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ fontSize: '16px', fontWeight: 800, color: '#4ade80', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ fontSize: '15px', fontWeight: 700, color: '#059669', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Shield size={18} /> What You See on Your Screen
               </div>
-              <span style={{ fontSize: '10px', fontWeight: 700, color: '#4ade80', padding: '2px 8px', borderRadius: '4px', background: 'rgba(34, 197, 94, 0.15)' }}>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#059669', padding: '2px 8px', borderRadius: '4px', background: '#ecfdf5' }}>
                 WEBCAM LEVEL HUD
               </span>
             </div>
 
-            <div className="stealth-card-mockup" style={{ borderColor: 'rgba(56, 189, 248, 0.3)' }}>
-              <div style={{ width: '100%', textAlign: 'left', fontFamily: 'monospace', fontSize: '11px', color: '#38bdf8' }}>
-                <div style={{ color: '#4ade80', fontWeight: 700 }}>[STAR Teleprompter Ready]</div>
+            <div className="stealth-card-mockup">
+              <div style={{ width: '100%', textAlign: 'left', fontFamily: 'ui-monospace, monospace', fontSize: '11px', color: '#0f172a' }}>
+                <div style={{ color: '#059669', fontWeight: 700 }}>[STAR Teleprompter Ready]</div>
                 <div>• Situation: Migration of high-load cluster...</div>
                 <div>• Action: Implemented event-driven Saga pattern...</div>
-                <div style={{ color: '#fbbf24', marginTop: '4px' }}>Say: "To ensure reliability, we..."</div>
+                <div style={{ color: '#2563eb', marginTop: '4px' }}>Say: "To ensure reliability, we deployed..."</div>
               </div>
             </div>
 
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#94a3b8' }}>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#475569' }}>
               <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 ✓ Transparent HUD placed near your camera for natural eye contact
               </li>
@@ -763,72 +728,72 @@ export function LandingPage({ onOpenApp }) {
         <div className="features-grid">
           <div className="feature-box">
             <div className="feature-icon-wrapper">
-              <Volume2 size={22} />
+              <Volume2 size={20} />
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
               Direct System Audio Capture
             </div>
-            <div style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
               Transcribes interviewer speech cleanly from your system audio, eliminating background noise or room echo.
             </div>
           </div>
 
           <div className="feature-box">
             <div className="feature-icon-wrapper">
-              <Cpu size={22} />
+              <Cpu size={20} />
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
               Instant Screen Capture
             </div>
-            <div style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
               Press Alt+S to instantly capture complex coding questions, diagrams, or problem statements from any interview tab.
             </div>
           </div>
 
           <div className="feature-box">
             <div className="feature-icon-wrapper">
-              <Folder size={22} />
+              <Folder size={20} />
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
               Isolated Project Sessions
             </div>
-            <div style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
               Each interview has its own dedicated JD, resume context, mode, and chat history. Never mix company contexts.
             </div>
           </div>
 
           <div className="feature-box">
             <div className="feature-icon-wrapper">
-              <Lock size={22} />
+              <Lock size={20} />
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
               100% Client-Side Privacy
             </div>
-            <div style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
               Zero audio is ever stored on external servers. All speech-to-text and AI prompt context remain strictly under your control.
             </div>
           </div>
 
           <div className="feature-box">
             <div className="feature-icon-wrapper">
-              <Monitor size={22} />
+              <Monitor size={20} />
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
               Live P2P Screen Mirroring
             </div>
-            <div style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
               Watch coding problems and IDE code live on your phone with zero server lag. Pure P2P streaming over local Wi-Fi and WebRTC.
             </div>
           </div>
 
           <div className="feature-box">
             <div className="feature-icon-wrapper">
-              <Smartphone size={22} />
+              <Smartphone size={20} />
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
               Air-Gapped Mobile Teleprompter
             </div>
-            <div style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
               Scan a QR code from any iPhone or Android phone. Mount phone under your webcam for 100% natural eye contact with zero app install.
             </div>
           </div>
@@ -849,17 +814,17 @@ export function LandingPage({ onOpenApp }) {
           {/* Free 1st Project Card */}
           <div className="pricing-card">
             <div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: '#34d399' }}>First Interview Project</div>
-              <div style={{ fontSize: '36px', fontWeight: 800, color: '#f8fafc', marginTop: '8px' }}>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#059669' }}>First Interview Project</div>
+              <div style={{ fontSize: '34px', fontWeight: 800, color: '#0f172a', marginTop: '6px' }}>
                 ₹0 <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>/ 1st project</span>
               </div>
-              <div style={{ fontSize: '13px', color: '#94a3b8', marginTop: '8px', lineHeight: 1.5 }}>
+              <div style={{ fontSize: '13px', color: '#475569', marginTop: '8px', lineHeight: 1.5 }}>
                 100% free trial. Test your audio loopback, connect your phone teleprompter, and ace your initial interview round.
               </div>
 
-              <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.08)', margin: '20px 0' }} />
+              <div style={{ height: '1px', background: '#e2e8f0', margin: '20px 0' }} />
 
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#cbd5e1' }}>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#334155' }}>
                 <li>✓ <strong>1 Full 24-Hour Interview Project</strong></li>
                 <li>✓ <strong>No credit card or payment required</strong></li>
                 <li>✓ STAR, Technical & System Design Modes</li>
@@ -869,8 +834,8 @@ export function LandingPage({ onOpenApp }) {
               </ul>
             </div>
 
-            <button type="button" onClick={handleDownload} className="btn-ghost-cyan" style={{ justifyContent: 'center', width: '100%', marginTop: '24px' }}>
-              <Download size={15} /> Download & Start Free
+            <button type="button" onClick={handleDownload} className="btn-ghost-cyan" style={{ justifyContent: 'center', width: '100%', marginTop: '20px' }}>
+              <Download size={14} /> Download & Start Free
             </button>
           </div>
 
@@ -878,17 +843,17 @@ export function LandingPage({ onOpenApp }) {
           <div className="pricing-card featured">
             <div className="pricing-card-badge">Most Popular • Pay-As-You-Interview</div>
             <div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: '#38bdf8' }}>Additional Project Passes</div>
-              <div style={{ fontSize: '36px', fontWeight: 800, color: '#f8fafc', marginTop: '8px' }}>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#2563eb' }}>Additional Project Passes</div>
+              <div style={{ fontSize: '34px', fontWeight: 800, color: '#0f172a', marginTop: '6px' }}>
                 ₹99 <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>/ 24h pass</span>
               </div>
-              <div style={{ fontSize: '13px', color: '#94a3b8', marginTop: '8px', lineHeight: 1.5 }}>
+              <div style={{ fontSize: '13px', color: '#475569', marginTop: '8px', lineHeight: 1.5 }}>
                 Buy only when you have an interview scheduled. Timer starts only when you hit Activate.
               </div>
 
-              <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.08)', margin: '20px 0' }} />
+              <div style={{ height: '1px', background: '#e2e8f0', margin: '20px 0' }} />
 
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#f8fafc' }}>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#334155' }}>
                 <li>✓ <strong>1 Dedicated 24h Interview Session Pass</strong></li>
                 <li>✓ <strong>Timer starts ONLY when activated</strong></li>
                 <li>✓ <strong>Unactivated passes never expire</strong></li>
@@ -899,8 +864,8 @@ export function LandingPage({ onOpenApp }) {
               </ul>
             </div>
 
-            <button type="button" onClick={handleDownload} className="btn-primary-gradient" style={{ justifyContent: 'center', width: '100%', marginTop: '24px' }}>
-              <Download size={15} /> Download for Windows
+            <button type="button" onClick={handleDownload} className="btn-primary-gradient" style={{ justifyContent: 'center', width: '100%', marginTop: '20px' }}>
+              <Download size={14} /> Download for Windows
             </button>
           </div>
         </div>
@@ -924,7 +889,7 @@ export function LandingPage({ onOpenApp }) {
                   onClick={() => setExpandedFaq(isExpanded ? null : idx)}
                 >
                   <span>{item.q}</span>
-                  {isExpanded ? <ChevronUp size={16} color="#38bdf8" /> : <ChevronDown size={16} color="#64748b" />}
+                  {isExpanded ? <ChevronUp size={16} color="#2563eb" /> : <ChevronDown size={16} color="#64748b" />}
                 </button>
                 {isExpanded && <div className="faq-answer">{item.a}</div>}
               </div>
@@ -936,76 +901,73 @@ export function LandingPage({ onOpenApp }) {
       {/* Final Download CTA Banner */}
       <section id="download" className="cta-banner">
         <div className="cta-banner-inner">
-          <h2 style={{ fontSize: '38px', fontWeight: 800, color: '#ffffff', marginBottom: '14px' }}>
+          <h2 style={{ fontSize: '34px', fontWeight: 800, color: '#ffffff', marginBottom: '12px', letterSpacing: '-0.02em' }}>
             Your Dream Offer is One Interview Away.
           </h2>
-          <p style={{ fontSize: '16px', color: '#cbd5e1', maxWidth: '640px', margin: '0 auto 28px' }}>
-            Join thousands of software engineers, engineering managers, and product leads using Keter to interview with total confidence.
+          <p style={{ fontSize: '15px', color: '#94a3b8', maxWidth: '600px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+            Join software engineers and product leaders using Keter to interview with total confidence.
           </p>
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
-            <button type="button" onClick={handleDownload} className="btn-hero-download">
-              <Download size={18} />
+            <button
+              type="button"
+              onClick={handleDownload}
+              style={{
+                background: '#ffffff',
+                color: '#0f172a',
+                padding: '13px 26px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <Download size={16} />
               <span>Download Keter for Windows (.exe)</span>
             </button>
           </div>
 
-          <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '16px' }}>
+          <div style={{ fontSize: '11px', color: '#64748b', marginTop: '16px' }}>
             Windows 10 / 11 (64-bit) • Size: ~65 MB • Instant Stealth Setup
           </div>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section id="contact" style={{ padding: '60px 24px 40px', maxWidth: '840px', margin: '0 auto', textAlign: 'center' }}>
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.5))',
-          border: '1px solid rgba(56, 189, 248, 0.25)',
-          borderRadius: '20px',
-          padding: '36px 30px',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(56, 189, 248, 0.08)'
-        }}>
+      <section id="contact" style={{ padding: '40px 24px 20px', maxWidth: '780px', margin: '0 auto', textAlign: 'center' }}>
+        <div className="contact-section-inner">
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '8px',
-            padding: '6px 14px',
-            borderRadius: '20px',
-            background: 'rgba(56, 189, 248, 0.12)',
-            border: '1px solid rgba(56, 189, 248, 0.3)',
-            color: '#38bdf8',
-            fontSize: '12px',
+            gap: '6px',
+            padding: '4px 12px',
+            borderRadius: '16px',
+            background: '#eff6ff',
+            border: '1px solid #dbeafe',
+            color: '#2563eb',
+            fontSize: '11px',
             fontWeight: 700,
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
-            marginBottom: '16px'
+            marginBottom: '14px'
           }}>
-            <Mail size={14} /> Official Support & Inquiries
+            <Mail size={13} /> Official Support & Inquiries
           </div>
-          <h2 style={{ fontSize: '26px', fontWeight: 800, color: '#f8fafc', margin: '0 0 10px' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', margin: '0 0 8px' }}>
             Get in Touch With Our Team
           </h2>
-          <p style={{ color: '#94a3b8', fontSize: '14px', maxWidth: '580px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+          <p style={{ color: '#475569', fontSize: '14px', maxWidth: '540px', margin: '0 auto 20px', lineHeight: 1.5 }}>
             Have questions about Keter, need custom setup assistance for an upcoming interview, or have general business inquiries? Reach out anytime:
           </p>
           <a
             href="mailto:keterai26@gmail.com?subject=Keter%20AI%20Inquiry%20/%20Support"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '13px 28px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #38bdf8 0%, #2563eb 100%)',
-              color: '#ffffff',
-              fontSize: '15px',
-              fontWeight: 700,
-              textDecoration: 'none',
-              boxShadow: '0 8px 24px rgba(56, 189, 248, 0.35)',
-              transition: 'transform 0.15s ease'
-            }}
+            className="contact-email-btn"
           >
-            <Mail size={18} />
+            <Mail size={16} />
             <span>keterai26@gmail.com</span>
           </a>
         </div>
@@ -1014,16 +976,16 @@ export function LandingPage({ onOpenApp }) {
       {/* Footer */}
       <footer className="landing-footer">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Shield size={16} color="#38bdf8" />
-          <span style={{ color: '#f8fafc', fontWeight: 700 }}>KETER COPILOT</span>
+          <Shield size={16} color="#0f172a" />
+          <span style={{ color: '#0f172a', fontWeight: 700 }}>KETER COPILOT</span>
           <span>— Stealth Real-Time Interview Intelligence</span>
         </div>
 
-        <div style={{ fontSize: '13px', color: '#cbd5e1' }}>
-          Contact Support: <a href="mailto:keterai26@gmail.com" style={{ color: '#38bdf8', fontWeight: 600, textDecoration: 'none' }}>keterai26@gmail.com</a>
+        <div style={{ fontSize: '13px', color: '#475569' }}>
+          Contact Support: <a href="mailto:keterai26@gmail.com" style={{ color: '#2563eb', fontWeight: 600, textDecoration: 'none' }}>keterai26@gmail.com</a>
         </div>
 
-        <div style={{ maxWidth: '680px', fontSize: '11px', lineHeight: 1.5 }}>
+        <div style={{ maxWidth: '640px', fontSize: '11px', lineHeight: 1.5, color: '#64748b' }}>
           Disclaimer: Keter is an interview preparation, enablement, and real-time candidate assistance tool. Users are responsible for complying with the terms and conditions of their respective interview platforms.
         </div>
 
