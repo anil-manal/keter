@@ -1,41 +1,32 @@
 /* ==========================================================================
-   KETER - RAYCAST / LINEAR LIGHT MONOCHROME AESTHETIC
-   Sharp, Tactile, Keyboard-Driven, Bespoke Engineering Utility
+   KETER - LIVING PRODUCT INTERACTIVE EXPERIENCE
+   High-Fidelity Animations • Interactive Stages • Raycast/Linear Precision
    ========================================================================== */
 
 :root {
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
   --bg-tertiary: #f1f5f9;
-  --bg-card: #ffffff;
   --bg-dark: #090d16;
   
   --border-subtle: #e2e8f0;
   --border-medium: #cbd5e1;
   --border-strong: #94a3b8;
-  --border-dark: #1e293b;
   
   --text-primary: #090d16;
   --text-secondary: #334155;
   --text-muted: #64748b;
-  --text-faint: #94a3b8;
-  --text-inverse: #ffffff;
   
   --accent-blue: #0284c7;
   --accent-blue-light: #f0f9ff;
-  --accent-blue-border: #bae6fd;
-  
   --accent-emerald: #059669;
   --accent-emerald-light: #ecfdf5;
-  --accent-emerald-border: #a7f3d0;
-  
+  --accent-purple: #7c3aed;
   --accent-rose: #e11d48;
-  --accent-rose-light: #fff1f2;
   
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* Base Container */
 .raycast-landing {
   width: 100vw;
   height: 100vh;
@@ -50,25 +41,25 @@
   position: relative;
 }
 
-/* Background Technical Canvas Grid */
+/* Technical Blueprint Grid */
 .raycast-grid-pattern {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 850px;
+  height: 900px;
   background-image: 
     linear-gradient(to right, rgba(9, 13, 22, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(9, 13, 22, 0.04) 1px, transparent 1px);
   background-size: 32px 32px;
-  mask-image: radial-gradient(ellipse 75% 65% at 50% 0%, #000 45%, transparent 95%);
-  -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 0%, #000 45%, transparent 95%);
+  mask-image: radial-gradient(ellipse 80% 65% at 50% 0%, #000 50%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 65% at 50% 0%, #000 50%, transparent 95%);
   pointer-events: none;
   z-index: 0;
 }
 
 /* ============================================================
-   TACTILE KEYCAPS (<kbd>) - RAYCAST SIGNATURE STYLE
+   TACTILE KEYCAPS (<kbd>) WITH PRESS ANIMATION
    ============================================================ */
 .tactile-kbd {
   font-family: var(--font-mono);
@@ -79,13 +70,19 @@
   border: 1px solid #cbd5e1;
   border-bottom: 2px solid #94a3b8;
   border-radius: 5px;
-  padding: 2px 6px;
+  padding: 2px 7px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   line-height: 1.2;
   user-select: none;
+  transition: all 0.1s ease;
+}
+
+.tactile-kbd:active {
+  transform: translateY(1px);
+  border-bottom-width: 1px;
 }
 
 .tactile-kbd.dark {
@@ -96,14 +93,14 @@
 }
 
 /* ============================================================
-   STICKY COMMAND NAVBAR
+   STICKY NAVBAR
    ============================================================ */
 .raycast-nav {
   position: sticky;
   top: 0;
   width: 100%;
   z-index: 999;
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-subtle);
@@ -121,14 +118,15 @@
 }
 
 .nav-brand-badge {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   background: #090d16;
-  border-radius: 6px;
+  border-radius: 7px;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 5px rgba(9, 13, 22, 0.15);
 }
 
 .nav-brand-title {
@@ -144,25 +142,31 @@
   font-weight: 600;
   color: var(--accent-emerald);
   background: var(--accent-emerald-light);
-  border: 1px solid var(--accent-emerald-border);
+  border: 1px solid #a7f3d0;
   padding: 2px 7px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
 }
 
 .nav-pill-dot {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--accent-emerald);
+  animation: pulse-dot 1.8s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.3); }
 }
 
 .nav-links-cluster {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 22px;
 }
 
 .nav-btn-link {
@@ -172,8 +176,8 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 4px;
+  padding: 5px 8px;
+  border-radius: 5px;
   transition: all 0.15s ease;
 }
 
@@ -187,7 +191,7 @@
   color: #ffffff;
   border: 1px solid #090d16;
   padding: 8px 16px;
-  border-radius: 7px;
+  border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -211,7 +215,7 @@
   position: relative;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 60px 24px 30px;
+  padding: 54px 24px 24px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -225,22 +229,22 @@
   gap: 8px;
   background: #ffffff;
   border: 1px solid var(--border-subtle);
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-secondary);
-  margin-bottom: 22px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .hero-title-main {
-  font-size: 60px;
+  font-size: 58px;
   font-weight: 900;
   line-height: 1.08;
   letter-spacing: -0.04em;
   max-width: 950px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   color: #090d16;
 }
 
@@ -253,8 +257,8 @@
   font-size: 18px;
   line-height: 1.6;
   color: var(--text-secondary);
-  max-width: 740px;
-  margin-bottom: 30px;
+  max-width: 760px;
+  margin-bottom: 28px;
   font-weight: 400;
 }
 
@@ -263,7 +267,7 @@
   align-items: center;
   justify-content: center;
   gap: 14px;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
   flex-wrap: wrap;
 }
 
@@ -280,14 +284,14 @@
   border: 1px solid #090d16;
   text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(9, 13, 22, 0.12), 0 10px 24px -4px rgba(9, 13, 22, 0.15);
+  box-shadow: 0 4px 14px rgba(9, 13, 22, 0.12);
   transition: all 0.15s ease;
 }
 
 .btn-hero-solid:hover {
   background: #1e293b;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(9, 13, 22, 0.15), 0 14px 30px -4px rgba(9, 13, 22, 0.2);
+  box-shadow: 0 6px 20px rgba(9, 13, 22, 0.18);
 }
 
 .btn-hero-outline {
@@ -332,28 +336,138 @@
 }
 
 /* ============================================================
-   INTERACTIVE BEFORE / AFTER SCREEN-SHARE SLIDER (SHOWCASE)
-   Draggable interactive visualizer proving DWM invisibility
+   LIVING PRODUCT SIMULATOR (CENTERPIECE WITH ANIMATIONS)
    ============================================================ */
-.slider-showcase-container {
+.live-product-showcase {
   width: 100%;
   max-width: 1040px;
-  margin: 10px auto 0;
+  margin: 0 auto;
   position: relative;
   text-align: left;
 }
 
-.slider-outer-frame {
-  background: #ffffff;
-  border: 1px solid var(--border-medium);
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 20px 50px -10px rgba(9, 13, 22, 0.12), 0 0 0 1px rgba(9, 13, 22, 0.05);
+/* Step-By-Step Interactive Stage Controller */
+.simulator-stage-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
-.slider-instruction-bar {
-  background: #f8fafc;
-  border-bottom: 1px solid var(--border-subtle);
+@media (max-width: 768px) {
+  .simulator-stage-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.stage-tab-btn {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  position: relative;
+  overflow: hidden;
+}
+
+.stage-tab-btn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-medium);
+}
+
+.stage-tab-btn.active {
+  background: #ffffff;
+  border-color: #090d16;
+  box-shadow: 0 4px 12px rgba(9, 13, 22, 0.08);
+}
+
+.stage-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #0284c7;
+}
+
+.stage-num-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.stage-tab-btn.active .stage-num-badge {
+  color: #0284c7;
+}
+
+.stage-tab-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #090d16;
+}
+
+/* The Animated Product Window */
+.product-frame {
+  background: #ffffff;
+  border: 1.5px solid #090d16;
+  border-radius: 14px;
+  box-shadow: 0 24px 60px -12px rgba(9, 13, 22, 0.16), 0 0 0 1px rgba(9, 13, 22, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.product-frame.panic-hidden {
+  opacity: 0.15;
+  transform: scale(0.97) translateY(12px);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+/* Panic Overlay Message when triggered */
+.panic-active-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.panic-card-box {
+  background: #ffffff;
+  border: 2px solid #e11d48;
+  border-radius: 12px;
+  padding: 24px 32px;
+  box-shadow: 0 16px 40px rgba(225, 29, 72, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Product Window Titlebar */
+.product-titlebar {
+  background: #090d16;
+  color: #ffffff;
   padding: 10px 18px;
   display: flex;
   align-items: center;
@@ -361,61 +475,328 @@
   font-size: 12px;
 }
 
-.instruction-text {
-  color: var(--text-secondary);
-  font-weight: 600;
+.product-titlebar-left {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 12px;
 }
 
-.quick-toggle-buttons {
+.window-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.w-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.w-dot.close { background: #ef4444; }
+.w-dot.min { background: #f59e0b; }
+.w-dot.max { background: #10b981; }
+
+.product-title-brand {
+  font-weight: 800;
+  letter-spacing: -0.02em;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.btn-toggle-view {
+.product-status-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.15);
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  padding: 1px 7px;
+  border-radius: 4px;
+}
+
+.product-titlebar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+}
+
+/* Live Animated Audio Loopback Bar */
+.audio-stream-ribbon {
+  background: #f8fafc;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.audio-stream-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.audio-wave-equalizer {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+}
+
+.equalizer-bar {
+  width: 3px;
+  background: #0284c7;
+  border-radius: 2px;
+  animation: bounce-wave 0.8s ease-in-out infinite alternate;
+}
+
+.equalizer-bar:nth-child(1) { height: 35%; animation-delay: 0.1s; }
+.equalizer-bar:nth-child(2) { height: 75%; animation-delay: 0.25s; }
+.equalizer-bar:nth-child(3) { height: 100%; animation-delay: 0.15s; }
+.equalizer-bar:nth-child(4) { height: 60%; animation-delay: 0.35s; }
+.equalizer-bar:nth-child(5) { height: 90%; animation-delay: 0.05s; }
+.equalizer-bar:nth-child(6) { height: 45%; animation-delay: 0.2s; }
+.equalizer-bar:nth-child(7) { height: 80%; animation-delay: 0.3s; }
+.equalizer-bar:nth-child(8) { height: 50%; animation-delay: 0.18s; }
+
+@keyframes bounce-wave {
+  0% { transform: scaleY(0.3); opacity: 0.5; }
+  100% { transform: scaleY(1); opacity: 1; }
+}
+
+/* Main Display Area */
+.product-main-view {
+  padding: 20px;
+  background: #ffffff;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  position: relative;
+  min-height: 420px;
+}
+
+@media (max-width: 860px) {
+  .product-main-view {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left Pane: Code & Screen Capture with Animated Scan Beam */
+.screen-capture-pane {
+  background: #f8fafc;
+  border: 1px solid var(--border-medium);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.pane-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sample-code-box {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.6;
+  color: #1e293b;
   background: #ffffff;
   border: 1px solid var(--border-subtle);
-  font-size: 11px;
+  border-radius: 6px;
+  padding: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated OCR Scanner Beam (Alt+S Mode) */
+.ocr-scan-beam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #0284c7;
+  box-shadow: 0 0 16px 2px #0284c7, 0 0 30px #38bdf8;
+  animation: scan-loop 2.4s ease-in-out infinite;
+  z-index: 10;
+}
+
+@keyframes scan-loop {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 96%; opacity: 0; }
+}
+
+.ocr-target-bracket {
+  position: absolute;
+  border: 2px solid #0284c7;
+  border-radius: 8px;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  pointer-events: none;
+  animation: bracket-pulse 2.4s infinite ease-in-out;
+}
+
+@keyframes bracket-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* Right Pane: Teleprompter & Response Strategy */
+.teleprompter-pane {
+  background: #f8fafc;
+  border: 1px solid var(--border-medium);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prompter-stream-card {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.prompter-code-output {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: #090d16;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
+.live-cursor-block {
+  display: inline-block;
+  color: #0284c7;
+  animation: cursor-blink 0.8s step-start infinite;
+  margin-left: 2px;
+  font-weight: 900;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Product Window Footer Control Strip */
+.product-footer-strip {
+  padding: 12px 18px;
+  background: #f8fafc;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-hotkey-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hotkey-trigger-btn {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-bottom: 2px solid var(--border-medium);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 5px;
   cursor: pointer;
-  color: var(--text-secondary);
-  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #090d16;
+  transition: all 0.1s ease;
 }
 
-.btn-toggle-view.active {
-  background: #090d16;
-  border-color: #090d16;
-  color: #ffffff;
+.hotkey-trigger-btn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-strong);
 }
 
-/* The Draggable Split Canvas */
-.split-canvas-wrapper {
+.hotkey-trigger-btn:active {
+  transform: translateY(1px);
+  border-bottom-width: 1px;
+}
+
+/* ============================================================
+   STEALTH COMPARISON (BEFORE / AFTER DRAGGABLE SLIDER)
+   ============================================================ */
+.stealth-slider-section {
+  max-width: 1040px;
+  margin: 90px auto 0;
+  padding: 0 24px;
+}
+
+.slider-wrapper-box {
+  background: #ffffff;
+  border: 1.5px solid #090d16;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px -10px rgba(9, 13, 22, 0.12);
+}
+
+.slider-header-controls {
+  padding: 12px 20px;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.split-canvas-area {
   position: relative;
   width: 100%;
-  height: 480px;
+  height: 460px;
   overflow: hidden;
   user-select: none;
   background: #ffffff;
 }
 
-/* Layer 1: What Candidate Sees (with Keter HUD) */
 .split-layer-candidate {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: #fcfcfc;
+  background: #fafafa;
   display: flex;
   flex-direction: column;
 }
 
-/* Layer 2: What Zoom / Interviewer Sees (Clipped by slider percentage) */
 .split-layer-interviewer {
   position: absolute;
   top: 0;
@@ -425,134 +806,11 @@
   background: #ffffff;
   border-right: 2px solid #090d16;
   overflow: hidden;
-  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
 }
 
-/* Desktop Call Top Header */
-.screen-mock-header {
-  padding: 8px 16px;
-  background: #f1f5f9;
-  border-bottom: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-}
-
-.screen-mock-tag-safe {
-  background: var(--accent-emerald-light);
-  color: var(--accent-emerald);
-  border: 1px solid var(--accent-emerald-border);
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 4px;
-  font-size: 10px;
-}
-
-.screen-mock-tag-hud {
-  background: var(--accent-blue-light);
-  color: var(--accent-blue);
-  border: 1px solid var(--accent-blue-border);
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 4px;
-  font-size: 10px;
-}
-
-/* Underlying IDE in the Mockup */
-.mock-ide-layout {
-  flex: 1;
-  display: flex;
-  background: #ffffff;
-  position: relative;
-}
-
-.mock-ide-file-tree {
-  width: 130px;
-  background: #f8fafc;
-  border-right: 1px solid var(--border-subtle);
-  padding: 12px 10px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.mock-ide-editor-area {
-  flex: 1;
-  padding: 16px 20px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.65;
-  color: #1e293b;
-  background: #ffffff;
-}
-
-.mock-ide-editor-area .kw { color: #d946ef; font-weight: 600; }
-.mock-ide-editor-area .fn { color: #2563eb; font-weight: 600; }
-.mock-ide-editor-area .cm { color: #94a3b8; font-style: italic; }
-
-/* The Floating Keter HUD (Only Visible on Candidate Layer) */
-.mock-floating-hud {
-  position: absolute;
-  top: 24px;
-  right: 28px;
-  width: 480px;
-  background: #ffffff;
-  border: 1.5px solid #090d16;
-  border-radius: 10px;
-  box-shadow: 0 16px 36px -8px rgba(9, 13, 22, 0.22), 0 0 0 1px rgba(9, 13, 22, 0.05);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  z-index: 10;
-}
-
-.mock-hud-bar {
-  background: #090d16;
-  color: #ffffff;
-  padding: 8px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.mock-hud-content {
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background: #ffffff;
-}
-
-.mock-hud-q {
-  font-size: 12px;
-  font-weight: 600;
-  color: #090d16;
-  background: #f8fafc;
-  border: 1px solid var(--border-subtle);
-  border-radius: 6px;
-  padding: 8px 10px;
-}
-
-.mock-hud-a {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: #1e293b;
-  line-height: 1.5;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 6px;
-  padding: 10px;
-}
-
-/* Slider Drag Handle */
 .slider-drag-handle {
   position: absolute;
   top: 0;
@@ -577,129 +835,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 800;
 }
 
 /* ============================================================
-   TACTILE STEALTH COMMAND DECK (RAYCAST PALETTE STYLE)
+   LINEAR FEATURE CARDS
    ============================================================ */
-.command-deck-section {
-  max-width: 1040px;
-  margin: 90px auto 0;
-  padding: 0 24px;
-}
-
-.command-deck-container {
-  background: #ffffff;
-  border: 1px solid var(--border-medium);
-  border-radius: 14px;
-  box-shadow: 0 10px 30px -4px rgba(9, 13, 22, 0.08);
-  overflow: hidden;
-}
-
-.command-deck-header {
-  padding: 14px 20px;
-  background: #f8fafc;
-  border-bottom: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.deck-title-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #090d16;
-}
-
-.deck-hotkeys-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.deck-body {
-  padding: 24px;
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 24px;
-}
-
-@media (max-width: 820px) {
-  .deck-body {
-    grid-template-columns: 1fr;
-  }
-}
-
-.deck-modes-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.deck-mode-item {
-  padding: 10px 12px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  background: #ffffff;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.15s ease;
-}
-
-.deck-mode-item:hover {
-  background: var(--bg-secondary);
-  border-color: var(--border-medium);
-}
-
-.deck-mode-item.active {
-  background: #090d16;
-  border-color: #090d16;
-  color: #ffffff;
-}
-
-.deck-mode-item.active .item-sub {
-  color: #94a3b8;
-}
-
-.deck-teleprompter-view {
-  background: #f8fafc;
-  border: 1px solid var(--border-subtle);
-  border-radius: 10px;
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.teleprompter-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 10px;
-  font-size: 12px;
-}
-
-.teleprompter-stream-code {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.6;
-  color: #090d16;
-  white-space: pre-wrap;
-  word-break: break-word;
-  margin: 0;
-  max-height: 320px;
-  overflow-y: auto;
-}
-
-/* ============================================================
-   TACTILE FEATURE GRID (LINEAR / RAYCAST CARD STYLE)
-   ============================================================ */
-.linear-features-grid {
+.linear-card-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
@@ -707,7 +850,7 @@
 }
 
 @media (max-width: 900px) {
-  .linear-features-grid {
+  .linear-card-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -720,20 +863,19 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  transition: all 0.15s ease;
-  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .linear-card:hover {
   border-color: var(--border-medium);
-  box-shadow: 0 4px 14px rgba(9, 13, 22, 0.06);
-  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -4px rgba(9, 13, 22, 0.08);
+  transform: translateY(-2px);
 }
 
 .linear-card-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
   background: #f1f5f9;
   display: flex;
   align-items: center;
@@ -741,24 +883,10 @@
   color: #090d16;
 }
 
-.linear-card-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #090d16;
-  margin: 0;
-}
-
-.linear-card-body {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  margin: 0;
-}
-
 /* ============================================================
-   PRICING & FAQ (MONOCHROME EDITORIAL)
+   PRICING
    ============================================================ */
-.linear-pricing-row {
+.pricing-grid-two {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   max-width: 780px;
@@ -767,12 +895,12 @@
 }
 
 @media (max-width: 720px) {
-  .linear-pricing-row {
+  .pricing-grid-two {
     grid-template-columns: 1fr;
   }
 }
 
-.linear-pricing-card {
+.pricing-box {
   background: #ffffff;
   border: 1px solid var(--border-medium);
   border-radius: 12px;
@@ -783,43 +911,15 @@
   gap: 18px;
 }
 
-.linear-pricing-card.spotlight {
+.pricing-box.spotlight {
   border: 2px solid #090d16;
   box-shadow: 0 8px 24px -4px rgba(9, 13, 22, 0.12);
 }
 
-.pricing-title-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-}
-
-.pricing-cost {
-  font-size: 34px;
-  font-weight: 900;
-  letter-spacing: -0.03em;
-  color: #090d16;
-}
-
-.pricing-checklist {
-  list-style: none;
-  padding: 0;
-  margin: 16px 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.pricing-checklist li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* FAQ Accordion */
-.linear-faq-list {
+/* ============================================================
+   FAQ & FOOTER
+   ============================================================ */
+.faq-box-list {
   max-width: 780px;
   margin: 32px auto 0;
   display: flex;
@@ -827,7 +927,7 @@
   gap: 8px;
 }
 
-.linear-faq-item {
+.faq-row {
   background: #ffffff;
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
@@ -835,11 +935,11 @@
   transition: all 0.15s ease;
 }
 
-.linear-faq-item:hover {
+.faq-row:hover {
   border-color: var(--border-medium);
 }
 
-.linear-faq-btn {
+.faq-question-btn {
   width: 100%;
   padding: 16px 20px;
   background: none;
@@ -854,15 +954,14 @@
   justify-content: space-between;
 }
 
-.linear-faq-body {
+.faq-answer-pane {
   padding: 0 20px 16px;
   color: var(--text-secondary);
   font-size: 13px;
   line-height: 1.6;
 }
 
-/* Final Download Box */
-.linear-cta-card {
+.final-cta-card {
   max-width: 1040px;
   margin: 90px auto 30px;
   background: #090d16;
@@ -873,7 +972,7 @@
   box-shadow: 0 16px 36px -8px rgba(9, 13, 22, 0.25);
 }
 
-.linear-footer {
+.landing-footer {
   border-top: 1px solid var(--border-subtle);
   padding: 32px 24px;
   background: var(--bg-secondary);

@@ -23,51 +23,90 @@ import {
   Layers,
   Sliders,
   Terminal,
+  RotateCcw,
+  Radio,
+  Scan,
 } from 'lucide-react';
 import './LandingPage.css';
 
-const SIMULATOR_PRESETS = {
-  technical: {
-    title: 'Technical / DSA',
-    badge: 'Algorithms',
-    question: 'Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. Can you do it in O(N)?',
-    teleprompter: `[Approach: One-Pass Hash Map]
-• Time Complexity: O(N) linear time
-• Space Complexity: O(N) hash storage
+const PRODUCT_STAGES = [
+  {
+    id: 'audio',
+    num: '01',
+    label: 'Loopback Audio',
+    sub: '0ms System Driver',
+  },
+  {
+    id: 'ocr',
+    num: '02',
+    label: 'Alt+S Vision OCR',
+    sub: 'Screen Scanner',
+  },
+  {
+    id: 'teleprompter',
+    num: '03',
+    label: 'AI Teleprompter',
+    sub: 'Token Stream',
+  },
+  {
+    id: 'stealth',
+    num: '04',
+    label: 'DWM Exclusion',
+    sub: 'Zoom Invisible',
+  },
+];
+
+const PRESET_DATA = {
+  audio: {
+    title: 'Distributed Rate Limiter (System Design)',
+    question: 'How would you design a distributed Rate Limiter for an API gateway handling 100,000 requests per second with sub-5ms latency?',
+    solution: `[1. Requirements & Performance Target]:
+• 100k req/sec throughput with <5ms evaluation budget
+• Multi-region consistency without single point of failure
+
+[2. Algorithm Choice: Sliding Window Counter vs Token Bucket]:
+"I recommend a Redis-backed Sliding Window Counter. Token Bucket allows burst spikes that can saturate downstream microservices. Sliding Window provides smooth, predictable rate limiting while remaining memory efficient."
+
+[3. High-Throughput Edge Strategy]:
+• Local in-memory batching at Envoy API gateway (flush counters every 50ms)
+• Redis Cluster partitioned by user_id/IP hash key with Lua atomic scripts
+• Local degraded fallback if Redis cluster network latency exceeds 5ms"`,
+  },
+  ocr: {
+    title: 'LeetCode 42: Trapping Rain Water (Hard)',
+    question: '[Alt+S Captured from Screen] Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.',
+    solution: `[Optimal Strategy: Two Pointers]
+• Time Complexity: O(N) linear one-pass
+• Space Complexity: O(1) constant auxiliary memory
 
 [Verbatim Script for Interviewer]:
-"To achieve linear O(N) time instead of the naive O(N²) nested loop, I will maintain a hash map where each key is the number we've seen and its value is the index.
-For each element, we calculate complement = target - nums[i]. If complement is already in the map, we return [map[complement], i]. Otherwise, we record nums[i] in the map."
+"Instead of computing the left and right max arrays with O(N) extra space, I will use a two-pointer approach starting from both ends.
+We maintain left_max and right_max. If height[left] < height[right], water trapped at 'left' is strictly bounded by left_max. We accumulate water and increment left. Otherwise, we do the symmetric operation for right."
 
 [Python 3 Implementation]:
-def twoSum(nums: list[int], target: int) -> list[int]:
-    lookup = {}
-    for i, num in enumerate(nums):
-        complement = target - num
-        if complement in lookup:
-            return [lookup[complement], i]
-        lookup[num] = i
-    return []`,
+def trap(height: list[int]) -> int:
+    left, right = 0, len(height) - 1
+    left_max, right_max = 0, 0
+    trapped = 0
+    while left < right:
+        if height[left] < height[right]:
+            if height[left] >= left_max:
+                left_max = height[left]
+            else:
+                trapped += left_max - height[left]
+            left += 1
+        else:
+            if height[right] >= right_max:
+                right_max = height[right]
+            else:
+                trapped += right_max - height[right]
+            right -= 1
+    return trapped`,
   },
-  system_design: {
-    title: 'System Design',
-    badge: 'Distributed Systems',
-    question: 'How would you design a distributed Rate Limiter for an API gateway serving 100k requests/second with sub-5ms overhead?',
-    teleprompter: `[1. Key Scale & Latency Targets]
-• 100,000 req/sec across 4 multi-region clusters
-• Sub-5ms budget for rate limit evaluation
-
-[2. Core Architectural Strategy]:
-"I recommend a Redis-backed Sliding Window Counter with local memory token batching at Envoy. Instead of reaching out to Redis on every single request, the API gateway batches local consumption and syncs every 20ms using Lua scripts to prevent distributed race conditions."
-
-[3. High Availability Fallback]:
-• If Redis cluster encounters partition latency > 5ms, fallback to local in-memory Leaky Bucket to guarantee zero outage for legitimate traffic."`,
-  },
-  star: {
-    title: 'STAR Behavioral',
-    badge: 'Engineering Leadership',
+  teleprompter: {
+    title: 'STAR Behavioral: High-Stakes Technical Disagreement',
     question: 'Tell me about a time you had a high-stakes disagreement with a senior engineer or architect regarding technical direction.',
-    teleprompter: `[Situation]:
+    solution: `[Situation]:
 At my previous company, we were migrating our core monolithic billing pipeline to microservices under a tight 3-month SOC2 compliance deadline.
 
 [Task]:
@@ -79,11 +118,10 @@ Instead of arguing opinions, I spun up a lightweight Locust benchmark comparing 
 [Result]:
 The team unanimously adopted the Saga pattern, saving an estimated 3 weeks of edge-case debugging and achieving zero data inconsistency incidents post-launch.`,
   },
-  negotiation: {
-    title: 'Compensation',
-    badge: 'Offer Strategy',
+  stealth: {
+    title: 'Salary Negotiation & Offer Close',
     question: 'What is your current compensation and what are your salary expectations for this Senior Engineer role?',
-    teleprompter: `[Tactical Guideline: Deflect without refusing]
+    solution: `[Tactical Guideline: Deflect without refusing]
 
 [Verbatim Script to Say]:
 "Thanks for asking! Right now, my primary priority is finding the right technical and cultural fit where I can drive high-impact outcomes for the team.
@@ -122,82 +160,97 @@ const FAQ_ITEMS = [
 ];
 
 export function LandingPage() {
-  const [activeCategory, setActiveCategory] = useState('technical');
-  const [simText, setSimText] = useState('');
+  const [activeStage, setActiveStage] = useState('audio');
+  const [streamedText, setStreamedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isPanicHidden, setIsPanicHidden] = useState(false);
+  const [isScanningOCR, setIsScanningOCR] = useState(false);
   const [copied, setCopied] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState(0);
 
-  // Interactive Before/After Split Slider State
-  const [sliderPos, setSliderPos] = useState(50); // 0 to 100%
+  // Before/After Slider State
+  const [sliderPos, setSliderPos] = useState(50);
   const [isDraggingSlider, setIsDraggingSlider] = useState(false);
-  const sliderContainerRef = useRef(null);
+  const sliderRef = useRef(null);
 
-  const currentPreset = SIMULATOR_PRESETS[activeCategory];
+  const stageData = PRESET_DATA[activeStage];
 
-  // Simulates real-time token streaming when preset changes
+  // Token streaming animation when stage changes
   useEffect(() => {
     setIsTyping(true);
-    setSimText('');
-    const fullText = currentPreset.teleprompter;
+    setStreamedText('');
+    const fullText = stageData.solution;
     let idx = 0;
 
     const interval = setInterval(() => {
-      idx += 12;
+      idx += 14;
       if (idx >= fullText.length) {
-        setSimText(fullText);
+        setStreamedText(fullText);
         setIsTyping(false);
         clearInterval(interval);
       } else {
-        setSimText(fullText.substring(0, idx));
+        setStreamedText(fullText.substring(0, idx));
       }
     }, 15);
 
     return () => clearInterval(interval);
-  }, [activeCategory]);
+  }, [activeStage]);
 
-  // Handle Dragging Slider
+  // Trigger Alt+S scan animation
+  const triggerScanAnimation = () => {
+    setIsScanningOCR(true);
+    setTimeout(() => {
+      setIsScanningOCR(false);
+    }, 2400);
+  };
+
+  // Keyboard shortcut listener on landing page
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsPanicHidden((prev) => !prev);
+      }
+      if (e.altKey && (e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        setActiveStage('ocr');
+        triggerScanAnimation();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Slider Mouse/Touch Handlers
   const handleSliderMove = (clientX) => {
-    if (!sliderContainerRef.current) return;
-    const rect = sliderContainerRef.current.getBoundingClientRect();
+    if (!sliderRef.current) return;
+    const rect = sliderRef.current.getBoundingClientRect();
     const x = clientX - rect.left;
-    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    setSliderPos(percentage);
-  };
-
-  const handleTouchMove = (e) => {
-    if (isDraggingSlider && e.touches[0]) {
-      handleSliderMove(e.touches[0].clientX);
-    }
-  };
-
-  const handleMouseMove = (e) => {
-    if (isDraggingSlider) {
-      handleSliderMove(e.clientX);
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDraggingSlider(false);
+    const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    setSliderPos(pct);
   };
 
   useEffect(() => {
+    const onMove = (e) => {
+      if (isDraggingSlider) handleSliderMove(e.clientX || (e.touches && e.touches[0].clientX));
+    };
+    const onUp = () => setIsDraggingSlider(false);
+
     if (isDraggingSlider) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      window.addEventListener('touchmove', handleTouchMove);
-      window.addEventListener('touchend', handleMouseUp);
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+      window.addEventListener('touchmove', onMove);
+      window.addEventListener('touchend', onUp);
     }
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleMouseUp);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onUp);
     };
   }, [isDraggingSlider]);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(simText);
+    navigator.clipboard.writeText(streamedText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -236,14 +289,14 @@ export function LandingPage() {
         </div>
 
         <div className="nav-links-cluster">
-          <button type="button" onClick={() => scrollTo('slider-demo')} className="nav-btn-link">
-            Stealth Proof
+          <button type="button" onClick={() => scrollTo('product-sim')} className="nav-btn-link">
+            Live Product
           </button>
-          <button type="button" onClick={() => scrollTo('command-deck')} className="nav-btn-link">
-            Command Deck
+          <button type="button" onClick={() => scrollTo('stealth-slider')} className="nav-btn-link">
+            Screen Proof
           </button>
-          <button type="button" onClick={() => scrollTo('shortcuts')} className="nav-btn-link">
-            Hotkeys
+          <button type="button" onClick={() => scrollTo('features')} className="nav-btn-link">
+            Capabilities
           </button>
           <button type="button" onClick={() => scrollTo('pricing')} className="nav-btn-link">
             Pricing
@@ -255,7 +308,7 @@ export function LandingPage() {
 
         <div>
           <button type="button" onClick={handleDownload} className="btn-nav-primary">
-            <Download size={13} /> Download Keter
+            <Download size={13} /> Download for Windows
           </button>
         </div>
       </nav>
@@ -263,9 +316,9 @@ export function LandingPage() {
       {/* Hero Section */}
       <header className="raycast-hero">
         <div className="hero-tag-strip">
-          <span style={{ color: '#059669', fontWeight: 700 }}>● Hardware-Level Exclusion</span>
+          <span style={{ color: '#059669', fontWeight: 700 }}>● Windows DWM Hardware Exclusion</span>
           <span>•</span>
-          <span>Zero Overlays on Zoom, Teams & Google Meet</span>
+          <span>100% Invisible on Zoom, Teams & Meet Screen-Shares</span>
         </div>
 
         <h1 className="hero-title-main">
@@ -273,7 +326,7 @@ export function LandingPage() {
         </h1>
 
         <p className="hero-subtitle-clean">
-          Direct system audio loopback transcription, instant STAR & DSA answer generation, and native Windows DWM screen-share exclusion. Completely undetectable to interviewers.
+          Direct system audio loopback transcription, instant STAR & DSA answer generation, and native Windows display exclusion. Completely undetectable to interviewers.
         </p>
 
         <div className="hero-action-cluster">
@@ -282,15 +335,15 @@ export function LandingPage() {
             <span>Download Keter for Windows (.exe)</span>
           </button>
 
-          <button type="button" onClick={() => scrollTo('slider-demo')} className="btn-hero-outline">
+          <button type="button" onClick={() => scrollTo('stealth-slider')} className="btn-hero-outline">
             <Eye size={15} color="#0284c7" />
-            <span>See Live Screen Proof</span>
+            <span>Inspect Screen-Share Proof</span>
           </button>
         </div>
 
         <div className="hero-quick-specs">
           <div className="spec-entry">
-            <kbd className="tactile-kbd">Alt</kbd> + <kbd className="tactile-kbd">S</kbd> Instant Screen OCR
+            <kbd className="tactile-kbd">Alt</kbd> + <kbd className="tactile-kbd">S</kbd> Vision OCR
           </div>
           <div className="spec-entry">
             <kbd className="tactile-kbd">Esc</kbd> Panic Kill-Switch
@@ -301,288 +354,392 @@ export function LandingPage() {
         </div>
 
         {/* ============================================================
-           INTERACTIVE BEFORE / AFTER SCREEN-SHARE SLIDER (SHOWCASE)
-           Direct interactive proof of DWM window exclusion
+           LIVING PRODUCT EXPERIENCE (INTERACTIVE ANIMATED CENTERPIECE)
            ============================================================ */}
-        <div id="slider-demo" className="slider-showcase-container">
-          <div className="slider-outer-frame">
-            {/* Top Toolbar with Instructions & Preset Toggles */}
-            <div className="slider-instruction-bar">
-              <div className="instruction-text">
-                <Sliders size={13} color="#0284c7" />
-                <span>Drag the slider handle horizontally to verify screen-share invisibility:</span>
+        <div id="product-sim" className="live-product-showcase">
+          {/* Interactive 4-Stage Controller */}
+          <div className="simulator-stage-selector">
+            {PRODUCT_STAGES.map((s) => {
+              const isActive = activeStage === s.id;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveStage(s.id);
+                    if (s.id === 'ocr') triggerScanAnimation();
+                  }}
+                  className={`stage-tab-btn ${isActive ? 'active' : ''}`}
+                >
+                  <span className="stage-num-badge">{s.num}</span>
+                  <span className="stage-tab-label">{s.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Living Product Frame */}
+          <div className={`product-frame ${isPanicHidden ? 'panic-hidden' : ''}`}>
+            {/* Titlebar */}
+            <div className="product-titlebar">
+              <div className="product-titlebar-left">
+                <div className="window-dots">
+                  <span className="w-dot close" />
+                  <span className="w-dot min" />
+                  <span className="w-dot max" />
+                </div>
+                <div className="product-title-brand">
+                  <Shield size={13} color="#38bdf8" />
+                  <span>Keter Copilot</span>
+                </div>
+                <span className="product-status-tag">
+                  ● DWM EXCLUDED (ZOOM INVISIBLE)
+                </span>
               </div>
 
-              <div className="quick-toggle-buttons">
-                <button
-                  type="button"
-                  onClick={() => setSliderPos(100)}
-                  className={`btn-toggle-view ${sliderPos >= 90 ? 'active' : ''}`}
-                >
-                  Zoom View (Clean Desktop)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSliderPos(50)}
-                  className={`btn-toggle-view ${sliderPos > 20 && sliderPos < 80 ? 'active' : ''}`}
-                >
-                  Split View (50%)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSliderPos(0)}
-                  className={`btn-toggle-view ${sliderPos <= 10 ? 'active' : ''}`}
-                >
-                  Candidate View (HUD Visible)
-                </button>
+              <div className="product-titlebar-right">
+                <span>Loop: <strong>Google Senior SWE Assessment</strong></span>
+                <span>•</span>
+                <span style={{ color: '#4ade80' }}>Local Audio Loopback: Active</span>
               </div>
             </div>
 
-            {/* Draggable Split Canvas */}
-            <div
-              ref={sliderContainerRef}
-              className="split-canvas-wrapper"
-              onMouseDown={(e) => {
-                setIsDraggingSlider(true);
-                handleSliderMove(e.clientX);
-              }}
-              onTouchStart={(e) => {
-                setIsDraggingSlider(true);
-                if (e.touches[0]) handleSliderMove(e.touches[0].clientX);
-              }}
-            >
-              {/* LAYER 1: CANDIDATE VIEW (Background with Floating Keter HUD) */}
-              <div className="split-layer-candidate">
-                <div className="screen-mock-header">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="screen-mock-tag-hud">CANDIDATE MONITOR VIEW</span>
-                    <span style={{ color: '#64748b' }}>Webcam-Level Floating Teleprompter Active</span>
+            {/* Live Audio Equalizer Ribbon */}
+            <div className="audio-stream-ribbon">
+              <div className="audio-stream-info">
+                <div className="audio-wave-equalizer">
+                  <div className="equalizer-bar" />
+                  <div className="equalizer-bar" />
+                  <div className="equalizer-bar" />
+                  <div className="equalizer-bar" />
+                  <div className="equalizer-bar" />
+                  <div className="equalizer-bar" />
+                  <div className="equalizer-bar" />
+                  <div className="equalizer-bar" />
+                </div>
+                <span>
+                  Interviewer Speech Stream: <strong style={{ color: '#090d16' }}>WASAPI 0ms Driver Intercept</strong>
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#64748b' }}>
+                <span>Noise Isolation: <strong>-48dB</strong></span>
+                <span>•</span>
+                <span>Acoustic Echo: <strong>0.00% (Direct)</strong></span>
+              </div>
+            </div>
+
+            {/* Split Main View */}
+            <div className="product-main-view">
+              {/* Left Pane: Code & Question Scanner */}
+              <div className="screen-capture-pane">
+                <div className="pane-header-row">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Camera size={13} color="#0284c7" />
+                    <span>Candidate Screen / Coding IDE</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <kbd className="tactile-kbd">Alt+S</kbd>
-                    <kbd className="tactile-kbd">Esc</kbd>
+                  <span style={{ color: '#0284c7', fontWeight: 600 }}>Alt+S Crop Area</span>
+                </div>
+
+                <div className="sample-code-box">
+                  {/* OCR Laser Scanner Line when active */}
+                  {isScanningOCR && <div className="ocr-scan-beam" />}
+                  {isScanningOCR && <div className="ocr-target-bracket" />}
+
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#0284c7', marginBottom: '8px' }}>
+                    {stageData.title}
+                  </div>
+
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '5px', padding: '8px', color: '#090d16', marginBottom: '10px', fontSize: '11.5px', lineHeight: 1.45 }}>
+                    "{stageData.question}"
+                  </div>
+
+                  <div style={{ color: '#475569', fontSize: '10.5px' }}>
+                    <div><span style={{ color: '#d946ef', fontWeight: 600 }}>class</span> <span style={{ color: '#2563eb', fontWeight: 600 }}>Solution</span>:</div>
+                    <div style={{ paddingLeft: '14px' }}><span style={{ color: '#d946ef' }}>def</span> <span style={{ color: '#7c3aed' }}>optimalSolve</span>(self, stream_input):</div>
+                    <div style={{ paddingLeft: '28px', color: '#94a3b8' }}># Candidate workspace shared on Zoom</div>
+                    <div style={{ paddingLeft: '28px' }}>return telemetry_buffer</div>
                   </div>
                 </div>
 
-                <div className="mock-ide-layout">
-                  <div className="mock-ide-file-tree">
-                    <div style={{ color: '#090d16', fontWeight: 700 }}>EXPLORER</div>
-                    <div style={{ color: '#2563eb', fontWeight: 600 }}>▶ solution.py</div>
-                    <div>test_runner.py</div>
-                    <div>system_notes.md</div>
-                  </div>
-
-                  <div className="mock-ide-editor-area">
-                    <div><span className="kw">from</span> typing <span className="kw">import</span> List, Optional</div>
-                    <div className="cm"># Interview Coding Assessment • Shared IDE</div>
-                    <div><span className="kw">class</span> <span className="fn">Solution</span>:</div>
-                    <div style={{ paddingLeft: '16px' }}><span className="kw">def</span> <span className="fn">twoSum</span>(self, nums: List[int], target: int) -&gt; List[int]:</div>
-                    <div style={{ paddingLeft: '32px' }}>lookup = &#123;&#125;</div>
-                    <div style={{ paddingLeft: '32px' }}><span className="kw">for</span> i, num <span className="kw">in</span> enumerate(nums):</div>
-                    <div style={{ paddingLeft: '48px' }}>complement = target - num</div>
-                    <div style={{ paddingLeft: '48px' }}><span className="kw">if</span> complement <span className="kw">in</span> lookup:</div>
-                    <div style={{ paddingLeft: '64px' }}><span className="kw">return</span> [lookup[complement], i]</div>
-                    <div style={{ paddingLeft: '48px' }}>lookup[num] = i</div>
-                  </div>
-
-                  {/* FLOATING KETER STEALTH HUD */}
-                  <div className="mock-floating-hud">
-                    <div className="mock-hud-bar">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Shield size={12} color="#38bdf8" />
-                        <span>KETER STEALTH COPILOT</span>
-                      </div>
-                      <span style={{ color: '#4ade80', fontSize: '9px', fontWeight: 800 }}>● DWM EXCLUDED</span>
-                    </div>
-
-                    <div className="mock-hud-content">
-                      <div className="mock-hud-q">
-                        <span style={{ fontSize: '10px', color: '#64748b', display: 'block', textTransform: 'uppercase' }}>
-                          Interviewer Voice (Loopback):
-                        </span>
-                        "{currentPreset.question}"
-                      </div>
-
-                      <div className="mock-hud-a">
-                        <div style={{ color: '#059669', fontWeight: 700, marginBottom: '4px' }}>
-                          [Optimal Strategy Teleprompter]
-                        </div>
-                        <div>• Time: O(N) linear one-pass hash map</div>
-                        <div>• Say: "To achieve linear time instead of naive O(N²)..."</div>
-                      </div>
-                    </div>
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={triggerScanAnimation}
+                    className="hotkey-trigger-btn"
+                  >
+                    <Scan size={12} color="#0284c7" />
+                    <span>Trigger <kbd className="tactile-kbd">Alt+S</kbd> Scanner</span>
+                  </button>
+                  <span style={{ fontSize: '10px', color: '#64748b' }}>OCR Latency: 110ms</span>
                 </div>
               </div>
 
-              {/* LAYER 2: INTERVIEWER / ZOOM VIEW (Clipped by slider position) */}
-              <div
-                className="split-layer-interviewer"
-                style={{ width: `${sliderPos}%` }}
-              >
-                <div className="screen-mock-header" style={{ width: sliderContainerRef.current ? `${sliderContainerRef.current.clientWidth}px` : '100%' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="screen-mock-tag-safe">ZOOM / TEAMS SHARED STREAM</span>
-                    <span style={{ color: '#64748b' }}>Pristine Desktop • Zero Overlays Visible</span>
+              {/* Right Pane: AI Teleprompter & Response Strategy */}
+              <div className="teleprompter-pane">
+                <div className="pane-header-row">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Sparkles size={13} color="#059669" />
+                    <span>Real-Time Teleprompter & Strategy</span>
                   </div>
-                  <span style={{ color: '#059669', fontWeight: 600, fontSize: '11px' }}>
-                    100% Clean Recording
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: isTyping ? '#0284c7' : '#059669', fontWeight: 600 }}>
+                      {isTyping ? 'Generating...' : 'Instant 210ms'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: copied ? '#059669' : '#64748b',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '3px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {copied ? <Check size={12} /> : <Copy size={12} />}
+                      <span>{copied ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  </div>
                 </div>
 
-                <div className="mock-ide-layout" style={{ width: sliderContainerRef.current ? `${sliderContainerRef.current.clientWidth}px` : '100%' }}>
-                  <div className="mock-ide-file-tree">
-                    <div style={{ color: '#090d16', fontWeight: 700 }}>EXPLORER</div>
-                    <div style={{ color: '#2563eb', fontWeight: 600 }}>▶ solution.py</div>
-                    <div>test_runner.py</div>
-                    <div>system_notes.md</div>
-                  </div>
-
-                  <div className="mock-ide-editor-area">
-                    <div><span className="kw">from</span> typing <span className="kw">import</span> List, Optional</div>
-                    <div className="cm"># Interview Coding Assessment • Shared IDE</div>
-                    <div><span className="kw">class</span> <span className="fn">Solution</span>:</div>
-                    <div style={{ paddingLeft: '16px' }}><span className="kw">def</span> <span className="fn">twoSum</span>(self, nums: List[int], target: int) -&gt; List[int]:</div>
-                    <div style={{ paddingLeft: '32px' }}>lookup = &#123;&#125;</div>
-                    <div style={{ paddingLeft: '32px' }}><span className="kw">for</span> i, num <span className="kw">in</span> enumerate(nums):</div>
-                    <div style={{ paddingLeft: '48px' }}>complement = target - num</div>
-                    <div style={{ paddingLeft: '48px' }}><span className="kw">if</span> complement <span className="kw">in</span> lookup:</div>
-                    <div style={{ paddingLeft: '64px' }}><span className="kw">return</span> [lookup[complement], i]</div>
-                    <div style={{ paddingLeft: '48px' }}>lookup[num] = i</div>
-                  </div>
-                  {/* Notice: NO Keter HUD is in this layer! Pristine clean stream */}
+                <div className="prompter-stream-card">
+                  <pre className="prompter-code-output">
+                    {streamedText}
+                    {isTyping && <span className="live-cursor-block">█</span>}
+                  </pre>
                 </div>
               </div>
+            </div>
 
-              {/* SLIDER DRAGGABLE DIVIDER HANDLE */}
-              <div
-                className="slider-drag-handle"
-                style={{ left: `${sliderPos}%` }}
-                onMouseDown={() => setIsDraggingSlider(true)}
-                onTouchStart={() => setIsDraggingSlider(true)}
-              >
-                <div className="handle-pill">
-                  ↔
-                </div>
+            {/* Product Footer Control Strip */}
+            <div className="product-footer-strip">
+              <div className="footer-hotkey-actions">
+                <button
+                  type="button"
+                  onClick={() => setIsPanicHidden(true)}
+                  className="hotkey-trigger-btn"
+                  style={{ color: '#e11d48' }}
+                >
+                  <Zap size={12} color="#e11d48" />
+                  <span>Test Panic Hide (<kbd className="tactile-kbd">Esc</kbd>)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveStage('ocr');
+                    triggerScanAnimation();
+                  }}
+                  className="hotkey-trigger-btn"
+                >
+                  <Camera size={12} color="#0284c7" />
+                  <span>Simulate Alt+S Screen Grab</span>
+                </button>
+              </div>
+
+              <div style={{ fontSize: '11px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Lock size={12} color="#059669" />
+                <span>Windows DWM Affinity: <strong>WDA_EXCLUDEFROMCAPTURE</strong></span>
               </div>
             </div>
           </div>
+
+          {/* Panic State Message (if hidden by Esc) */}
+          {isPanicHidden && (
+            <div className="panic-active-overlay">
+              <div className="panic-card-box">
+                <Zap size={28} color="#e11d48" />
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#090d16' }}>
+                  Emergency Panic Kill-Switch Triggered
+                </h3>
+                <p style={{ margin: 0, fontSize: '13px', color: '#475569', maxWidth: '380px' }}>
+                  All overlays, visualizer bars, and audio hooks were destroyed from your screen in <strong>18ms</strong>.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsPanicHidden(false)}
+                  className="btn-hero-solid"
+                  style={{ marginTop: '8px', padding: '8px 18px', fontSize: '13px' }}
+                >
+                  <RotateCcw size={13} /> Reopen Keter HUD
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
       {/* ============================================================
-         TACTILE STEALTH COMMAND DECK (RAYCAST PALETTE STYLE)
+         INTERACTIVE BEFORE / AFTER SCREEN-SHARE SLIDER (SHOWCASE)
          ============================================================ */}
-      <section id="command-deck" className="command-deck-section">
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '8px' }}>
-            Tactile Teleprompter Interface
+      <section id="stealth-slider" className="stealth-slider-section">
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '6px' }}>
+            Hardware Proof
           </div>
           <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#090d16', letterSpacing: '-0.025em', margin: 0 }}>
-            Real-Time Strategy Command Deck
+            Zoom Shared Screen vs. Your Actual Screen
           </h2>
+          <p style={{ fontSize: '14px', color: '#475569', marginTop: '6px' }}>
+            Drag the handle horizontally to see how Keter is completely stripped from the shared video stream.
+          </p>
         </div>
 
-        <div className="command-deck-container">
-          {/* Header Bar */}
-          <div className="command-deck-header">
-            <div className="deck-title-row">
-              <Terminal size={15} color="#0284c7" />
-              <span>Target Project Context: <strong>Google Senior Infrastructure Loop</strong></span>
+        <div className="slider-wrapper-box">
+          <div className="slider-header-controls">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, color: '#090d16' }}>
+              <Sliders size={13} color="#0284c7" />
+              <span>Interactive Split Screen Comparison</span>
             </div>
 
-            <div className="deck-hotkeys-row">
-              <span>Hotkeys:</span>
-              <kbd className="tactile-kbd">Alt + S</kbd>
-              <kbd className="tactile-kbd">Esc</kbd>
-              <kbd className="tactile-kbd">Ctrl + Shift + X</kbd>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button
+                type="button"
+                onClick={() => setSliderPos(100)}
+                className="btn-toggle-view"
+                style={{ background: sliderPos >= 90 ? '#090d16' : '#ffffff', color: sliderPos >= 90 ? '#ffffff' : '#090d16' }}
+              >
+                Interviewer View (Zoom)
+              </button>
+              <button
+                type="button"
+                onClick={() => setSliderPos(50)}
+                className="btn-toggle-view"
+                style={{ background: sliderPos > 20 && sliderPos < 80 ? '#090d16' : '#ffffff', color: sliderPos > 20 && sliderPos < 80 ? '#ffffff' : '#090d16' }}
+              >
+                50 / 50 Split
+              </button>
+              <button
+                type="button"
+                onClick={() => setSliderPos(0)}
+                className="btn-toggle-view"
+                style={{ background: sliderPos <= 10 ? '#090d16' : '#ffffff', color: sliderPos <= 10 ? '#ffffff' : '#090d16' }}
+              >
+                Candidate View (HUD)
+              </button>
             </div>
           </div>
 
-          <div className="deck-body">
-            {/* Left Category Selector */}
-            <div className="deck-modes-sidebar">
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
-                Select Round Scenario:
+          <div
+            ref={sliderRef}
+            className="split-canvas-area"
+            onMouseDown={(e) => {
+              setIsDraggingSlider(true);
+              handleSliderMove(e.clientX);
+            }}
+            onTouchStart={(e) => {
+              setIsDraggingSlider(true);
+              if (e.touches[0]) handleSliderMove(e.touches[0].clientX);
+            }}
+          >
+            {/* LAYER 1: CANDIDATE MONITOR (With Floating Keter HUD) */}
+            <div className="split-layer-candidate">
+              <div style={{ padding: '8px 16px', background: '#f1f5f9', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
+                <span style={{ fontWeight: 700, color: '#0284c7' }}>WHAT YOU SEE (CANDIDATE VIEW)</span>
+                <span style={{ color: '#64748b' }}>Webcam-Level Floating Prompter Active</span>
               </div>
 
-              {Object.keys(SIMULATOR_PRESETS).map((key) => {
-                const item = SIMULATOR_PRESETS[key];
-                const isActive = activeCategory === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setActiveCategory(key)}
-                    className={`deck-mode-item ${isActive ? 'active' : ''}`}
-                  >
-                    <div style={{ fontSize: '13px', fontWeight: 700 }}>
-                      {item.title}
-                    </div>
-                    <div className="item-sub" style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                      {item.badge}
-                    </div>
-                  </button>
-                );
-              })}
+              <div style={{ flex: 1, display: 'flex', position: 'relative', background: '#ffffff' }}>
+                <div style={{ width: '130px', background: '#f8fafc', borderRight: '1px solid #e2e8f0', padding: '12px 10px', fontFamily: 'monospace', fontSize: '11px', color: '#64748b' }}>
+                  <div style={{ color: '#090d16', fontWeight: 700 }}>WORKSPACE</div>
+                  <div style={{ color: '#2563eb', fontWeight: 600 }}>▶ solution.py</div>
+                  <div>test_suite.py</div>
+                </div>
 
-              <div style={{ marginTop: 'auto', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', fontSize: '11px', color: '#475569', lineHeight: 1.45 }}>
-                💡 Direct driver loopback captures audio with sub-5ms latency from headphones or speakers.
+                <div style={{ flex: 1, padding: '16px 20px', fontFamily: 'monospace', fontSize: '12px', lineHeight: 1.65, color: '#1e293b' }}>
+                  <div><span style={{ color: '#d946ef', fontWeight: 600 }}>class</span> <span style={{ color: '#2563eb', fontWeight: 600 }}>InterviewSolution</span>:</div>
+                  <div style={{ paddingLeft: '16px' }}><span style={{ color: '#d946ef' }}>def</span> <span style={{ color: '#7c3aed' }}>twoSum</span>(self, nums, target):</div>
+                  <div style={{ paddingLeft: '32px' }}>lookup = &#123;&#125;</div>
+                  <div style={{ paddingLeft: '32px' }}><span style={{ color: '#d946ef' }}>for</span> i, n <span style={{ color: '#d946ef' }}>in</span> enumerate(nums):</div>
+                  <div style={{ paddingLeft: '48px' }}>diff = target - n</div>
+                  <div style={{ paddingLeft: '48px' }}><span style={{ color: '#d946ef' }}>if</span> diff <span style={{ color: '#d946ef' }}>in</span> lookup:</div>
+                  <div style={{ paddingLeft: '64px' }}><span style={{ color: '#d946ef' }}>return</span> [lookup[diff], i]</div>
+                </div>
+
+                {/* FLOATING KETER HUD */}
+                <div className="mock-floating-hud">
+                  <div className="mock-hud-bar">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Shield size={12} color="#38bdf8" />
+                      <span>KETER STEALTH COPILOT</span>
+                    </div>
+                    <span style={{ color: '#4ade80', fontSize: '9px', fontWeight: 800 }}>● DWM EXCLUDED</span>
+                  </div>
+
+                  <div className="mock-hud-content">
+                    <div className="mock-hud-q">
+                      <span style={{ fontSize: '10px', color: '#64748b', display: 'block', textTransform: 'uppercase' }}>
+                        Audio Loopback Transcript:
+                      </span>
+                      "Can you solve Two Sum in linear O(N) time?"
+                    </div>
+
+                    <div className="mock-hud-a">
+                      <div style={{ color: '#059669', fontWeight: 700, marginBottom: '2px' }}>
+                        [Optimal Strategy Teleprompter]
+                      </div>
+                      <div>• Time: O(N) linear one-pass hash map</div>
+                      <div>• Say: "To achieve linear time instead of naive O(N²)..."</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Right Teleprompter Output */}
-            <div className="deck-teleprompter-view">
-              <div className="teleprompter-toolbar">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: isTyping ? '#0284c7' : '#059669' }} />
-                  <span style={{ fontWeight: 700, color: '#090d16' }}>
-                    {isTyping ? 'Streaming Real-Time Solution...' : 'Optimal Teleprompter Ready'}
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ color: '#64748b' }}>Response: <strong>&lt;240ms</strong></span>
-                  <button
-                    type="button"
-                    onClick={handleCopy}
-                    style={{
-                      background: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '5px',
-                      padding: '4px 8px',
-                      fontSize: '11px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      color: copied ? '#059669' : '#090d16',
-                      fontWeight: 600,
-                    }}
-                  >
-                    {copied ? <Check size={11} /> : <Copy size={11} />}
-                    <span>{copied ? 'Copied' : 'Copy Text'}</span>
-                  </button>
-                </div>
+            {/* LAYER 2: INTERVIEWER / ZOOM VIEW (Clipped by slider position) */}
+            <div
+              className="split-layer-interviewer"
+              style={{ width: `${sliderPos}%` }}
+            >
+              <div style={{ padding: '8px 16px', background: '#f1f5f9', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', fontSize: '11px', width: sliderRef.current ? `${sliderRef.current.clientWidth}px` : '100%' }}>
+                <span style={{ fontWeight: 700, color: '#059669' }}>WHAT INTERVIEWER SEES (ZOOM SCREEN SHARE)</span>
+                <span style={{ color: '#059669', fontWeight: 600 }}>100% Clean Recording • 0 Overlays</span>
               </div>
 
-              <div style={{ fontSize: '12px', fontWeight: 600, color: '#090d16', background: '#ffffff', border: '1px solid #e2e8f0', padding: '8px 10px', borderRadius: '6px' }}>
-                Question: "{currentPreset.question}"
-              </div>
+              <div style={{ flex: 1, display: 'flex', position: 'relative', background: '#ffffff', width: sliderRef.current ? `${sliderRef.current.clientWidth}px` : '100%' }}>
+                <div style={{ width: '130px', background: '#f8fafc', borderRight: '1px solid #e2e8f0', padding: '12px 10px', fontFamily: 'monospace', fontSize: '11px', color: '#64748b' }}>
+                  <div style={{ color: '#090d16', fontWeight: 700 }}>WORKSPACE</div>
+                  <div style={{ color: '#2563eb', fontWeight: 600 }}>▶ solution.py</div>
+                  <div>test_suite.py</div>
+                </div>
 
-              <pre className="teleprompter-stream-code">
-                {simText}
-                {isTyping && <span style={{ color: '#0284c7' }}> ▋</span>}
-              </pre>
+                <div style={{ flex: 1, padding: '16px 20px', fontFamily: 'monospace', fontSize: '12px', lineHeight: 1.65, color: '#1e293b' }}>
+                  <div><span style={{ color: '#d946ef', fontWeight: 600 }}>class</span> <span style={{ color: '#2563eb', fontWeight: 600 }}>InterviewSolution</span>:</div>
+                  <div style={{ paddingLeft: '16px' }}><span style={{ color: '#d946ef' }}>def</span> <span style={{ color: '#7c3aed' }}>twoSum</span>(self, nums, target):</div>
+                  <div style={{ paddingLeft: '32px' }}>lookup = &#123;&#125;</div>
+                  <div style={{ paddingLeft: '32px' }}><span style={{ color: '#d946ef' }}>for</span> i, n <span style={{ color: '#d946ef' }}>in</span> enumerate(nums):</div>
+                  <div style={{ paddingLeft: '48px' }}>diff = target - n</div>
+                  <div style={{ paddingLeft: '48px' }}><span style={{ color: '#d946ef' }}>if</span> diff <span style={{ color: '#d946ef' }}>in</span> lookup:</div>
+                  <div style={{ paddingLeft: '64px' }}><span style={{ color: '#d946ef' }}>return</span> [lookup[diff], i]</div>
+                </div>
+                {/* No Keter HUD exists on this layer */}
+              </div>
+            </div>
+
+            {/* Slider Drag Handle */}
+            <div
+              className="slider-drag-handle"
+              style={{ left: `${sliderPos}%` }}
+              onMouseDown={() => setIsDraggingSlider(true)}
+              onTouchStart={() => setIsDraggingSlider(true)}
+            >
+              <div className="handle-pill">
+                ↔
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* ============================================================
-         TACTILE SHORTCUTS & FEATURES (LINEAR CARD STYLE)
+         TACTILE FEATURE CARDS
          ============================================================ */}
-      <section id="shortcuts" style={{ maxWidth: '1040px', margin: '90px auto 0', padding: '0 24px' }}>
+      <section id="features" style={{ maxWidth: '1040px', margin: '90px auto 0', padding: '0 24px' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{ fontSize: '11px', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '8px' }}>
             Tactile Precision
@@ -592,16 +749,16 @@ export function LandingPage() {
           </h2>
         </div>
 
-        <div className="linear-features-grid">
+        <div className="linear-card-grid">
           <div className="linear-card">
             <div className="linear-card-icon">
               <Camera size={16} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h4 className="linear-card-title">Instant Vision OCR</h4>
+              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#090d16' }}>Instant Vision OCR</h4>
               <kbd className="tactile-kbd">Alt + S</kbd>
             </div>
-            <p className="linear-card-body">
+            <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
               Instantly crop and extract coding challenges, system architectures, or LeetCode problem descriptions straight off your screen.
             </p>
           </div>
@@ -611,10 +768,10 @@ export function LandingPage() {
               <Zap size={16} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h4 className="linear-card-title">Panic Kill-Switch</h4>
+              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#090d16' }}>Panic Kill-Switch</h4>
               <kbd className="tactile-kbd">Esc</kbd>
             </div>
-            <p className="linear-card-body">
+            <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
               Hit Escape or Ctrl+Shift+X to instantaneously destroy all visible HUD overlays and audio hooks in under 50 milliseconds.
             </p>
           </div>
@@ -624,10 +781,10 @@ export function LandingPage() {
               <Volume2 size={16} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h4 className="linear-card-title">System Audio Loopback</h4>
+              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#090d16' }}>System Audio Loopback</h4>
               <span style={{ fontSize: '11px', fontWeight: 700, color: '#059669' }}>0ms Echo</span>
             </div>
-            <p className="linear-card-body">
+            <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
               Listens directly to incoming audio playback on Windows. No meetings bots joining the call and zero proctor detection.
             </p>
           </div>
@@ -637,10 +794,10 @@ export function LandingPage() {
               <Smartphone size={16} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h4 className="linear-card-title">Air-Gapped Teleprompter</h4>
+              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#090d16' }}>Air-Gapped Teleprompter</h4>
               <span style={{ fontSize: '11px', fontWeight: 700, color: '#0284c7' }}>P2P WebRTC</span>
             </div>
-            <p className="linear-card-body">
+            <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
               Scan a QR code from any smartphone. Mount your phone under your webcam for natural eye contact with zero app install.
             </p>
           </div>
@@ -650,10 +807,10 @@ export function LandingPage() {
               <Folder size={16} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h4 className="linear-card-title">Isolated Workspaces</h4>
+              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#090d16' }}>Isolated Workspaces</h4>
               <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>Multi-Company</span>
             </div>
-            <p className="linear-card-body">
+            <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
               Isolate resumes, specific job descriptions, and chat memory by company. Never leak company context between rounds.
             </p>
           </div>
@@ -663,10 +820,10 @@ export function LandingPage() {
               <Lock size={16} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h4 className="linear-card-title">100% Client Privacy</h4>
+              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#090d16' }}>100% Client Privacy</h4>
               <span style={{ fontSize: '11px', fontWeight: 700, color: '#059669' }}>Local-First</span>
             </div>
-            <p className="linear-card-body">
+            <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
               Zero audio is ever logged to external servers. All speech-to-text and AI prompt context remain strictly on your machine.
             </p>
           </div>
@@ -674,12 +831,12 @@ export function LandingPage() {
       </section>
 
       {/* ============================================================
-         PRICING (MONOCHROME EDITORIAL)
+         PRICING SECTION
          ============================================================ */}
       <section id="pricing" style={{ maxWidth: '1040px', margin: '90px auto 0', padding: '0 24px' }}>
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div style={{ fontSize: '11px', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '8px' }}>
-            Simple & Transparent
+            Fair & Transparent
           </div>
           <h2 style={{ fontSize: '32px', fontWeight: 800, color: '#090d16', letterSpacing: '-0.025em', margin: 0 }}>
             Zero Monthly Subscription Traps
@@ -689,28 +846,28 @@ export function LandingPage() {
           </p>
         </div>
 
-        <div className="linear-pricing-row">
+        <div className="pricing-grid-two">
           {/* Trial Pass */}
-          <div className="linear-pricing-card">
+          <div className="pricing-box">
             <div>
-              <div className="pricing-title-row">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                 <span style={{ fontSize: '14px', fontWeight: 700, color: '#64748b' }}>Trial Pass</span>
                 <span style={{ fontSize: '11px', fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '2px 8px', borderRadius: '4px' }}>
                   NO CARD REQUIRED
                 </span>
               </div>
-              <div className="pricing-cost">
+              <div style={{ fontSize: '34px', fontWeight: 900, color: '#090d16', margin: '6px 0' }}>
                 ₹0 <span style={{ fontSize: '13px', fontWeight: 500, color: '#64748b' }}>/ 1st project</span>
               </div>
               <p style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5, margin: '8px 0 0' }}>
                 Full feature access. Test your audio loopback, connect your phone prompter, and complete your initial round.
               </p>
 
-              <ul className="pricing-checklist">
-                <li><CheckCircle size={14} color="#059669" /> 1 Full 24-Hour Interview Project</li>
-                <li><CheckCircle size={14} color="#059669" /> STAR, Technical & System Design Modes</li>
-                <li><CheckCircle size={14} color="#059669" /> Instant Screen Question Capture (Alt+S)</li>
-                <li><CheckCircle size={14} color="#059669" /> 100% Invisible on Zoom / Teams / Meet</li>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '16px 0 0', display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '13px', color: '#334155' }}>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={14} color="#059669" /> 1 Full 24-Hour Interview Project</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={14} color="#059669" /> STAR, Technical & System Design Modes</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={14} color="#059669" /> Instant Screen Question Capture (Alt+S)</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={14} color="#059669" /> 100% Invisible on Zoom / Teams / Meet</li>
               </ul>
             </div>
 
@@ -720,27 +877,27 @@ export function LandingPage() {
           </div>
 
           {/* Paid Pass */}
-          <div className="linear-pricing-card spotlight">
+          <div className="pricing-box spotlight">
             <div>
-              <div className="pricing-title-row">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                 <span style={{ fontSize: '14px', fontWeight: 800, color: '#090d16' }}>24h Interview Pass</span>
                 <span style={{ fontSize: '11px', fontWeight: 700, color: '#ffffff', background: '#090d16', padding: '2px 8px', borderRadius: '4px' }}>
                   PAY-AS-YOU-INTERVIEW
                 </span>
               </div>
-              <div className="pricing-cost">
+              <div style={{ fontSize: '34px', fontWeight: 900, color: '#090d16', margin: '6px 0' }}>
                 ₹99 <span style={{ fontSize: '13px', fontWeight: 500, color: '#64748b' }}>/ 24h pass</span>
               </div>
               <p style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5, margin: '8px 0 0' }}>
                 Timer starts ONLY when you click Activate before your interview. Purchased passes never expire.
               </p>
 
-              <ul className="pricing-checklist">
-                <li><CheckCircle size={14} color="#090d16" /> 1 Dedicated 24h Project Session</li>
-                <li><CheckCircle size={14} color="#090d16" /> Timer starts ONLY when activated</li>
-                <li><CheckCircle size={14} color="#090d16" /> Unactivated passes never expire</li>
-                <li><CheckCircle size={14} color="#090d16" /> Isolated JD Context & Resume Grounding</li>
-                <li><CheckCircle size={14} color="#090d16" /> Instant Razorpay UPI (GPay, PhonePe, Paytm)</li>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '16px 0 0', display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '13px', color: '#334155' }}>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={14} color="#090d16" /> 1 Dedicated 24h Project Session</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={14} color="#090d16" /> Timer starts ONLY when activated</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={14} color="#090d16" /> Unactivated passes never expire</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={14} color="#090d16" /> Isolated JD Context & Resume Grounding</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={14} color="#090d16" /> Instant Razorpay UPI (GPay, PhonePe, Paytm)</li>
               </ul>
             </div>
 
@@ -764,20 +921,20 @@ export function LandingPage() {
           </h2>
         </div>
 
-        <div className="linear-faq-list">
+        <div className="faq-box-list">
           {FAQ_ITEMS.map((item, idx) => {
             const isExpanded = expandedFaq === idx;
             return (
-              <div key={idx} className="linear-faq-item">
+              <div key={idx} className="faq-row">
                 <button
                   type="button"
-                  className="linear-faq-btn"
+                  className="faq-question-btn"
                   onClick={() => setExpandedFaq(isExpanded ? null : idx)}
                 >
                   <span>{item.q}</span>
                   {isExpanded ? <ChevronUp size={15} color="#090d16" /> : <ChevronDown size={15} color="#64748b" />}
                 </button>
-                {isExpanded && <div className="linear-faq-body">{item.a}</div>}
+                {isExpanded && <div className="faq-answer-pane">{item.a}</div>}
               </div>
             );
           })}
@@ -788,7 +945,7 @@ export function LandingPage() {
          FINAL CALL TO ACTION
          ============================================================ */}
       <section style={{ maxWidth: '1040px', margin: '90px auto 0', padding: '0 24px' }}>
-        <div className="linear-cta-card">
+        <div className="final-cta-card">
           <h2 style={{ fontSize: '32px', fontWeight: 900, letterSpacing: '-0.03em', margin: '0 0 10px' }}>
             Ace Your Next Round with Complete Discretion.
           </h2>
@@ -839,7 +996,7 @@ export function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="linear-footer">
+      <footer className="landing-footer">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Shield size={16} color="#090d16" />
           <span style={{ color: '#090d16', fontWeight: 800 }}>KETER COPILOT</span>
