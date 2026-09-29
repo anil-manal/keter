@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Shield,
   Smartphone,
@@ -17,12 +17,19 @@ import {
   Sparkles,
   Mail,
   Monitor,
+  Mic,
+  MicOff,
+  Copy,
+  Check,
+  Radio,
+  Sliders,
 } from 'lucide-react';
 import './LandingPage.css';
 
 const SIMULATOR_PRESETS = {
   technical: {
-    title: 'Technical / Coding (DSA)',
+    title: 'Technical DSA',
+    tag: 'Algorithms & Data Structures',
     question: 'Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. Can you do it in O(N)?',
     teleprompter: `[Approach: One-Pass Hash Map]
 • Time Complexity: O(N) linear time
@@ -44,24 +51,23 @@ def twoSum(nums: list[int], target: int) -> list[int]:
   },
   system_design: {
     title: 'System Design',
-    question: 'How would you design a scalable URL Shortening service like TinyURL with 100M new URLs per month and low latency?',
-    teleprompter: `[1. Scale & Capacity Estimation]
-• 100M writes/month ≈ 40 writes/sec (10:1 read/write ratio = 400 reads/sec)
-• 5 years storage: 6 billion URLs ≈ 3TB total storage
+    tag: 'Distributed Architecture',
+    question: 'How would you design a distributed Rate Limiter for an API gateway serving 100k requests/second?',
+    teleprompter: `[1. Key Requirements & Scale]
+• 100k req/sec throughput with sub-5ms latency penalty
+• Distributed consistency across multi-region edge clusters
 
-[2. Core Architecture Strategy]:
-• Hash vs Base62: Use 64-bit distributed Counter (Snowflake ID) converted to Base62 (62^7 ≈ 3.5 Trillion unique 7-char URLs).
-• Zero collisions compared to MD5 hashing with truncated keys.
+[2. Algorithm Choice: Sliding Window Counter vs Token Bucket]:
+"I recommend a Redis-backed Sliding Window Counter with Lua scripts. Token Bucket is prone to burst spikes, whereas Sliding Window provides accurate rate limiting while remaining memory efficient."
 
-[3. High-Throughput Read Tier]:
-• Multi-region Redis Cache with LRU eviction for top 20% hot links (80/20 rule).
-• Cache hit ratio target > 85%, serving 301 Permanent Redirects in <12ms.
-
-[4. Storage & Reliability]:
-• NoSQL (Cassandra / DynamoDB) partitioned on hash_key with replication factor 3.`,
+[3. High-Throughput Edge Caching Strategy]:
+• Local memory batching at Envoy API gateway (flush counters every 50ms to Redis Cluster)
+• Redis Cluster partitioned by user_id/IP hash key
+• Fallback to local degraded mode if Redis cluster experiences network partition."`,
   },
   star: {
     title: 'STAR Behavioral',
+    tag: 'Leadership & Conflict',
     question: 'Tell me about a time you had a high-stakes disagreement with a senior engineer or architect regarding technical direction.',
     teleprompter: `[Situation]:
 At my previous company, we were migrating our core monolithic billing pipeline to microservices under a tight 3-month SOC2 compliance deadline.
@@ -76,7 +82,8 @@ Instead of arguing opinions, I spun up a lightweight Locust benchmark comparing 
 The team unanimously adopted the Saga pattern, saving an estimated 3 weeks of edge-case debugging and achieving zero data inconsistency incidents post-launch.`,
   },
   negotiation: {
-    title: 'Salary & Compensation',
+    title: 'Salary Negotiation',
+    tag: 'Offer & Compensation',
     question: 'What is your current compensation and what are your salary expectations for this Senior Engineer role?',
     teleprompter: `[Tactical Guideline: Deflect without refusing]
 
@@ -92,48 +99,53 @@ Could you share the budgeted salary band and equity range for this position?"`,
 const FAQ_ITEMS = [
   {
     q: 'Will Zoom, Microsoft Teams, or Google Meet detect Keter on my screen?',
-    a: 'No. Keter uses hardware-level screen invisibility. When you share your entire desktop or any application window on Zoom, Microsoft Teams, or Google Meet, Keter is completely invisible in the shared video feed. The interviewer only sees your clean desktop, browser, or code.',
+    a: 'No. Keter utilizes Windows Desktop Window Manager (DWM) display affinity exclusion. When you share your entire desktop or any individual window on Zoom, Teams, or Meet, Keter is stripped entirely from the video capture buffer. The interviewer only sees your clean desktop, browser, or code editor.',
   },
   {
     q: 'Does Keter show in the Windows Taskbar or Task Manager as an AI app?',
-    a: 'No. Keter is designed for total candidate privacy. It never shows in your Windows taskbar or Alt+Tab application switcher, and runs under an ordinary system background process name with zero AI branding.',
+    a: 'No. Keter runs without taskbar icons or Alt+Tab entries. In Task Manager, it runs as a standard background system host with zero AI branding for total candidate discretion.',
   },
   {
     q: 'How does Mobile Screen Mirroring and the Teleprompter work without servers?',
-    a: 'Keter uses zero-configuration peer-to-peer (P2P) WebRTC and local Wi-Fi. When you scan the QR code with your iPhone or Android camera, your phone securely mirrors your PC screen and streams live AI solutions in real-time. No video data ever touches a cloud video server ($0 server cost, 100% private), and zero app downloads are needed on your phone.',
+    a: 'Keter uses zero-configuration peer-to-peer (P2P) WebRTC over your local Wi-Fi. Scanning the QR code pairs your phone camera directly to your PC. Teleprompter solutions and screen streams flow directly phone-to-PC with 0ms server latency and zero external video storage.',
   },
   {
     q: 'When does the 24-hour pass validity timer start?',
-    a: 'The 24-hour countdown starts ONLY when you explicitly click "Activate Session" right before your interview starts. Purchased passes remain unactivated indefinitely until you choose to start your timer, allowing you to prepare JDs and resumes weeks in advance.',
+    a: 'The 24-hour timer starts ONLY when you click "Activate Session" before your interview. Passes remain valid indefinitely until you activate them, allowing you to prepare weeks in advance.',
   },
   {
     q: 'Can interview platforms detect that audio is being transcribed?',
-    a: 'No. Keter listens cleanly to incoming audio directly through your computer speakers. It never joins your call as a bot, attendee, or meeting plugin, making it completely imperceptible to interviewers.',
+    a: 'No. Keter captures system audio directly from your audio loopback driver. It never joins the meeting as a bot or plugin, so neither Zoom nor your interviewer has any awareness.',
   },
   {
     q: 'What is the Panic Kill-Switch?',
-    a: 'If you ever need to close everything instantly, simply press the Escape key or Ctrl+Shift+X. Keter closes immediately and clears your screen in less than a blink of an eye.',
+    a: 'Press Escape or Ctrl+Shift+X at any time to instantly terminate all overlays and clear your screen in less than 50 milliseconds.',
   },
 ];
 
 export function LandingPage() {
-  const [activePreset, setActivePreset] = useState('technical');
+  const [activeCategory, setActiveCategory] = useState('technical');
   const [simText, setSimText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState(0);
-  const [phoneViewMode, setPhoneViewMode] = useState('mirror'); // 'mirror' | 'prompter'
 
-  const currentPresetData = SIMULATOR_PRESETS[activePreset];
+  // Audio Loopback Tester State
+  const [isTestingAudio, setIsTestingAudio] = useState(false);
+  const [audioLevel, setAudioLevel] = useState(25);
+  const audioIntervalRef = useRef(null);
+
+  const currentPreset = SIMULATOR_PRESETS[activeCategory];
 
   // Simulates real-time token streaming when preset changes
   useEffect(() => {
     setIsTyping(true);
     setSimText('');
-    const fullText = currentPresetData.teleprompter;
+    const fullText = currentPreset.teleprompter;
     let idx = 0;
 
     const interval = setInterval(() => {
-      idx += 8;
+      idx += 10;
       if (idx >= fullText.length) {
         setSimText(fullText);
         setIsTyping(false);
@@ -144,13 +156,37 @@ export function LandingPage() {
     }, 15);
 
     return () => clearInterval(interval);
-  }, [activePreset]);
+  }, [activeCategory]);
+
+  // Audio Tester simulation
+  const toggleAudioTest = () => {
+    if (isTestingAudio) {
+      clearInterval(audioIntervalRef.current);
+      setIsTestingAudio(false);
+      setAudioLevel(15);
+    } else {
+      setIsTestingAudio(true);
+      audioIntervalRef.current = setInterval(() => {
+        setAudioLevel(Math.floor(Math.random() * 65) + 30);
+      }, 100);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (audioIntervalRef.current) clearInterval(audioIntervalRef.current);
+    };
+  }, []);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(simText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const scrollTo = (id) => {
     const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleDownload = (e) => {
@@ -173,38 +209,36 @@ export function LandingPage() {
           className="landing-logo"
           style={{ cursor: 'pointer' }}
         >
-          <div className="logo-icon-box">
-            <Shield size={18} color="#ffffff" strokeWidth={2.2} />
+          <div className="logo-shield-badge">
+            <Shield size={16} strokeWidth={2.4} />
           </div>
-          <span style={{ fontSize: '17px', fontWeight: '800', letterSpacing: '-0.02em', color: '#0f172a' }}>
-            KETER
-          </span>
-          <span className="logo-badge">STEALTH COPILOT</span>
+          <span className="logo-brand-name">KETER</span>
+          <span className="logo-tag">STEALTH COPILOT</span>
         </div>
 
         <div className="landing-nav-links">
-          <button type="button" onClick={() => scrollTo('simulator')} className="nav-link-btn">
-            Live Simulator
+          <button type="button" onClick={() => scrollTo('demo')} className="nav-link">
+            Live Demo
           </button>
-          <button type="button" onClick={() => scrollTo('stealth')} className="nav-link-btn">
-            Stealth Matrix
+          <button type="button" onClick={() => scrollTo('how-it-works')} className="nav-link">
+            How It Works
           </button>
-          <button type="button" onClick={() => scrollTo('features')} className="nav-link-btn">
-            Features
+          <button type="button" onClick={() => scrollTo('tester')} className="nav-link">
+            Audio Loopback
           </button>
-          <button type="button" onClick={() => scrollTo('pricing')} className="nav-link-btn">
-            Pricing (₹99)
+          <button type="button" onClick={() => scrollTo('stealth')} className="nav-link">
+            Stealth Proof
           </button>
-          <button type="button" onClick={() => scrollTo('faq')} className="nav-link-btn">
+          <button type="button" onClick={() => scrollTo('pricing')} className="nav-link">
+            Pricing
+          </button>
+          <button type="button" onClick={() => scrollTo('faq')} className="nav-link">
             FAQ
-          </button>
-          <button type="button" onClick={() => scrollTo('contact')} className="nav-link-btn highlight">
-            Contact
           </button>
         </div>
 
-        <div className="landing-nav-actions">
-          <button type="button" onClick={handleDownload} className="btn-primary-gradient">
+        <div>
+          <button type="button" onClick={handleDownload} className="btn-nav-download">
             <Download size={14} /> Download for Windows
           </button>
         </div>
@@ -212,670 +246,478 @@ export function LandingPage() {
 
       {/* Hero Section */}
       <header className="landing-hero">
-        <div className="hero-pill">
-          <span className="hero-pill-status" />
-          <span>100% Invisible on Screen Shares • Works with Zoom, Teams & Meet</span>
+        <div className="hero-pill-announcement">
+          <span className="pill-dot-green" />
+          <span>Hardware DWM Exclusion • 100% Invisible on Screen Shares</span>
         </div>
 
-        <h1 className="hero-title">
-          Ace Every Technical & Behavioral Interview in{' '}
-          <span className="hero-accent-text">Real-Time.</span>
+        <h1 className="hero-heading">
+          The Stealth Interview Copilot Designed for <span className="gradient-word">Engineers.</span>
         </h1>
 
-        <p className="hero-subtitle">
-          The stealth AI interview copilot designed for engineers and leaders. Undetectable on screen shares, grounded in your actual resume, with instant speech loopback and an air-gapped phone teleprompter.
+        <p className="hero-subhead">
+          Real-time speech loopback transcription, instant STAR & DSA answer generation, and hardware-level screen invisibility for Zoom, Microsoft Teams, and Google Meet.
         </p>
 
-        <div className="hero-ctas">
-          <button type="button" onClick={handleDownload} className="btn-hero-download">
+        <div className="hero-cta-group">
+          <button type="button" onClick={handleDownload} className="btn-cta-primary">
             <Download size={17} />
-            <span>Download for Windows 10 / 11</span>
+            <span>Download for Windows (64-bit)</span>
           </button>
 
-          <button type="button" onClick={() => scrollTo('simulator')} className="btn-hero-secondary">
+          <button type="button" onClick={() => scrollTo('demo')} className="btn-cta-secondary">
             <Play size={15} color="#2563eb" />
-            <span>Test Live Simulator</span>
+            <span>Try Interactive Demo</span>
           </button>
         </div>
 
-        <div className="hero-badges-row">
-          <div className="hero-badge-item">
-            <EyeOff size={14} color="#059669" /> Screen-Share Invisible
+        <div className="hero-specs-bar">
+          <div className="hero-spec-item">
+            <CheckCircle size={14} color="#059669" /> Zoom & Teams Invisible
           </div>
-          <div className="hero-badge-item">
-            <Smartphone size={14} color="#2563eb" /> Air-Gapped Mobile Teleprompter
+          <div className="hero-spec-item">
+            <CheckCircle size={14} color="#059669" /> Direct System Audio Loopback
           </div>
-          <div className="hero-badge-item">
-            <Zap size={14} color="#d97706" /> Instant Real-Time Prompts
+          <div className="hero-spec-item">
+            <CheckCircle size={14} color="#059669" /> Alt+S Screen Question OCR
           </div>
-          <div className="hero-badge-item">
-            <CheckCircle size={14} color="#059669" /> 1st Project Free • Then ₹99 / 24h Pass
+          <div className="hero-spec-item">
+            <CheckCircle size={14} color="#059669" /> 1st Interview Session Free
           </div>
         </div>
 
-        {/* Interactive Dual-Device Product Showcase (Laptop + Mobile Teleprompter) */}
-        <div className="hero-showcase-container">
-          {/* Mode Switcher Tabs right above the devices */}
-          <div className="hero-mode-pills">
-            <span className="hero-mode-label">Live Scenario:</span>
-            {Object.keys(SIMULATOR_PRESETS).map((key) => {
-              const item = SIMULATOR_PRESETS[key];
-              const isActive = activePreset === key;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setActivePreset(key)}
-                  className={`hero-mode-btn ${isActive ? 'active' : ''}`}
-                >
-                  <span className="hero-mode-dot" />
-                  {item.title}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="hero-devices-stage">
-            {/* 1. Main Laptop Mockup */}
-            <div className="laptop-mockup-wrapper">
-              <div className="laptop-screen-frame">
-                {/* Laptop Top Bezel with Camera */}
-                <div className="laptop-camera-notch">
-                  <div className="laptop-camera-lens" />
-                  <div className="laptop-camera-led" title="Screen Share Active" />
+        {/* ============================================================
+           AUTHENTIC PRODUCT DEMO WIDGET (IN HERO)
+           Real UI Widget previewing the actual Keter experience
+           ============================================================ */}
+        <div id="demo" className="hero-widget-container">
+          <div className="live-widget-card">
+            {/* Titlebar */}
+            <div className="widget-titlebar">
+              <div className="widget-titlebar-left">
+                <div className="window-dots">
+                  <span className="w-dot close" />
+                  <span className="w-dot min" />
+                  <span className="w-dot max" />
                 </div>
-
-                {/* Laptop Display Content */}
-                <div className="laptop-display-content">
-                  {/* Top Bar: Simulated Video Call / Screen Share Header */}
-                  <div className="call-header-bar">
-                    <div className="call-dots">
-                      <span className="dot red" />
-                      <span className="dot yellow" />
-                      <span className="dot green" />
-                    </div>
-                    <div className="call-title">
-                      Zoom Meeting: Technical Assessment Loop • Senior Software Engineer
-                    </div>
-                    <div className="call-share-badge">
-                      <span className="live-pulse" />
-                      <span>LIVE SCREEN SHARE ACTIVE</span>
-                    </div>
-                  </div>
-
-                  {/* Background: Candidate Code IDE (Behind the HUD) */}
-                  <div className="laptop-underlying-ide">
-                    <div className="ide-sidebar">
-                      <div className="ide-file active">solution.py</div>
-                      <div className="ide-file">test_cases.py</div>
-                      <div className="ide-file">notes.md</div>
-                    </div>
-                    <div className="ide-code-area">
-                      <div className="code-line"><span className="c-keyword">from</span> typing <span className="c-keyword">import</span> List, Optional, Dict</div>
-                      <div className="code-line"><span className="c-comment"># Problem: {currentPresetData.question.substring(0, 55)}...</span></div>
-                      <div className="code-line"><span className="c-keyword">class</span> <span className="c-class">InterviewSolution</span>:</div>
-                      <div className="code-line indent-1"><span className="c-keyword">def</span> <span className="c-func">solveInterviewProblem</span>(self, input_data):</div>
-                      <div className="code-line indent-2"><span className="c-comment"># Shared desktop screen view</span></div>
-                      <div className="code-line indent-2">result = []</div>
-                    </div>
-
-                    {/* FLOATING KETER STEALTH HUD (EXCLUDED FROM SCREEN CAPTURE) */}
-                    <div className="floating-keter-hud">
-                      <div className="hud-window-header">
-                        <div className="hud-logo-tag">
-                          <Shield size={12} color="#2563eb" />
-                          <span className="hud-name">KETER INTELLIGENCE</span>
-                          <span className="hud-pill">STEALTH HUD</span>
-                        </div>
-                        <div className="hud-audio-wave">
-                          <span className="hud-wave-bar" />
-                          <span className="hud-wave-bar" />
-                          <span className="hud-wave-bar" />
-                          <span className="hud-wave-bar" />
-                          <span className="hud-wave-bar" />
-                        </div>
-                        <div className="hud-status-badge">
-                          <span className="status-dot-glow" />
-                          <span>LISTENING LIVE</span>
-                        </div>
-                      </div>
-
-                      {/* Transcribed Question Box */}
-                      <div className="hud-question-box">
-                        <div className="hud-box-header">
-                          <Volume2 size={12} color="#2563eb" />
-                          <span>Interviewer Question:</span>
-                        </div>
-                        <p className="hud-question-text">
-                          "{currentPresetData.question}"
-                        </p>
-                      </div>
-
-                      {/* Real-Time Answer Teleprompter */}
-                      <div className="hud-teleprompter-box">
-                        <div className="hud-box-header">
-                          <Sparkles size={12} color="#7c3aed" />
-                          <span>Keter Real-Time Teleprompter & Response Strategy:</span>
-                        </div>
-                        <pre className="hud-code-stream">
-                          {simText}
-                          {isTyping && <span className="streaming-cursor">█</span>}
-                        </pre>
-                      </div>
-
-                      {/* Bottom Stealth Shield Ribbon */}
-                      <div className="hud-shield-ribbon">
-                        <div className="shield-left">
-                          <Lock size={12} color="#059669" />
-                          <span>Stealth Protection Active • Hidden from Interviewer</span>
-                        </div>
-                        <div className="shield-right">
-                          <span className="mode-indicator">{currentPresetData.title}</span>
-                          <span style={{ color: '#cbd5e1' }}>•</span>
-                          <span style={{ color: '#0f172a', fontWeight: 600 }}>Instant Response</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                <div className="widget-app-tag">
+                  <Shield size={13} color="#2563eb" />
+                  <span>Keter Intelligence Copilot</span>
                 </div>
+                <span className="widget-status-pill">
+                  <span className="pill-dot-green" /> STEALTH ACTIVE
+                </span>
               </div>
-              <div className="laptop-base-stand" />
+
+              <div className="widget-titlebar-right">
+                <span>Active Project: <strong>Google Senior SWE Loop</strong></span>
+                <span className="widget-shortcut-badge">Alt+S OCR</span>
+                <span className="widget-shortcut-badge">Esc Hide</span>
+              </div>
             </div>
 
-            {/* 2. Mobile Phone Teleprompter Mockup (Air-Gapped Companion) */}
-            <div className="mobile-mockup-wrapper">
-              <div className="mobile-device-chassis">
-                <div className="mobile-dynamic-island">
-                  <div className="island-camera" />
+            {/* Scenario Switcher Strip */}
+            <div className="widget-controls-strip">
+              <div className="widget-tab-buttons">
+                {Object.keys(SIMULATOR_PRESETS).map((key) => {
+                  const item = SIMULATOR_PRESETS[key];
+                  const isActive = activeCategory === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setActiveCategory(key)}
+                      className={`tab-btn ${isActive ? 'active' : ''}`}
+                    >
+                      {item.title}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={toggleAudioTest}
+                className={`mic-toggle-btn ${isTestingAudio ? 'recording' : ''}`}
+              >
+                {isTestingAudio ? <MicOff size={13} /> : <Mic size={13} />}
+                <span>{isTestingAudio ? 'Mute Audio Loopback' : 'Simulate Loopback Input'}</span>
+              </button>
+            </div>
+
+            {/* Recognized Question Box */}
+            <div className="widget-question-area">
+              <div className="question-label-row">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Volume2 size={13} color="#2563eb" />
+                  <span>Transcribed Interviewer Speech (0ms Driver Stream)</span>
+                </div>
+                <span style={{ color: '#059669', fontWeight: 600 }}>100% Match</span>
+              </div>
+              <p className="question-content-text">
+                "{currentPreset.question}"
+              </p>
+            </div>
+
+            {/* Real-Time Answer Teleprompter */}
+            <div className="widget-answer-body">
+              <div className="answer-header-row">
+                <div className="answer-header-left">
+                  <Sparkles size={14} />
+                  <span>Real-Time Response Strategy & Verbatim Teleprompter</span>
                 </div>
 
-                <div className="mobile-screen-content">
-                  {/* Phone Status Bar */}
-                  <div className="phone-status-row">
-                    <span>9:41</span>
-                    <span style={{ color: '#059669' }}>🔒 P2P Sync</span>
-                    <span>98% 🔋</span>
-                  </div>
-
-                  {/* Companion Header */}
-                  <div className="phone-hud-header">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Smartphone size={11} color="#2563eb" />
-                      <span style={{ fontSize: '10px', fontWeight: 700, color: '#0f172a' }}>KETER PHONE</span>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
-                      <button
-                        type="button"
-                        onClick={() => setPhoneViewMode(phoneViewMode === 'mirror' ? 'prompter' : 'mirror')}
-                        style={{
-                          fontSize: '8px',
-                          padding: '2px 5px',
-                          borderRadius: '4px',
-                          border: phoneViewMode === 'mirror' ? '1px solid #2563eb' : '1px solid #e2e8f0',
-                          background: phoneViewMode === 'mirror' ? '#eff6ff' : '#ffffff',
-                          color: phoneViewMode === 'mirror' ? '#1d4ed8' : '#64748b',
-                          cursor: 'pointer',
-                          fontWeight: 600,
-                        }}
-                      >
-                        {phoneViewMode === 'mirror' ? '🖥️ Mirror' : '📝 Prompter'}
-                      </button>
-                      <span className="phone-sync-pill">● LIVE</span>
-                    </div>
-                  </div>
-
-                  {phoneViewMode === 'mirror' ? (
-                    <>
-                      {/* Live PC Screen Mirror Box (Top) */}
-                      <div
-                        style={{
-                          margin: '4px 0',
-                          borderRadius: '6px',
-                          background: '#f8fafc',
-                          border: '1px solid #e2e8f0',
-                          padding: '6px 8px',
-                          position: 'relative',
-                          overflow: 'hidden',
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
-                          <span style={{ fontSize: '7.5px', fontWeight: 700, color: '#dc2626', background: '#fee2e2', padding: '1px 4px', borderRadius: '3px' }}>
-                            ● PC SCREEN MIRROR
-                          </span>
-                          <span style={{ fontSize: '7.5px', color: '#64748b' }}>0ms Latency</span>
-                        </div>
-                        <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: '8px', color: '#334155', lineHeight: 1.3, maxHeight: '45px', overflow: 'hidden' }}>
-                          {currentPresetData.question}
-                        </div>
-                      </div>
-
-                      {/* AI Response Prompter (Bottom) */}
-                      <div className="phone-teleprompter-body">
-                        <div className="phone-teleprompter-label">
-                          <span style={{ fontSize: '8.5px' }}>AI Prompter (Split View)</span>
-                          <span className="scroll-pill" style={{ fontSize: '7.5px' }}>Streaming</span>
-                        </div>
-                        <div className="phone-teleprompter-text" style={{ fontSize: '9px', lineHeight: 1.35, maxHeight: '120px' }}>
-                          {simText}
-                          {isTyping && <span className="streaming-cursor">█</span>}
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {/* Question Card */}
-                      <div className="phone-question-pill">
-                        <div className="phone-q-label">Interviewer Asks:</div>
-                        <div className="phone-q-body">{currentPresetData.question}</div>
-                      </div>
-
-                      {/* Teleprompter Scroll Box */}
-                      <div className="phone-teleprompter-body">
-                        <div className="phone-teleprompter-label">
-                          <span>Candidate Teleprompter</span>
-                          <span className="scroll-pill">Auto-Scroll</span>
-                        </div>
-                        <div className="phone-teleprompter-text">
-                          {simText}
-                          {isTyping && <span className="streaming-cursor">█</span>}
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* Phone Bottom Control Bar */}
-                  <div className="phone-bottom-bar">
-                    Mount phone under webcam for 100% natural eye contact
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span className="answer-latency-badge">
+                    Latency: <strong>240ms</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: copied ? '#059669' : '#64748b',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '11px',
+                    }}
+                  >
+                    {copied ? <Check size={12} /> : <Copy size={12} />}
+                    <span>{copied ? 'Copied' : 'Copy'}</span>
+                  </button>
                 </div>
               </div>
 
-              {/* Clean Stand Base */}
-              <div className="mobile-stand-neck" />
-              <div className="mobile-stand-base">
-                <div className="stand-brand-label">COMPANION STAND</div>
-              </div>
+              <pre className="answer-text-stream">
+                {simText}
+                {isTyping && <span className="typing-cursor-solid">▋</span>}
+              </pre>
             </div>
-          </div>
 
-          {/* Floating Feature Indicators below the showcase */}
-          <div className="hero-indicators-bar">
-            <div className="indicator-chip">
-              <Shield size={14} color="#059669" />
-              <span>100% Invisible on Screen Share (Zoom / Teams / Meet)</span>
-            </div>
-            <div className="indicator-chip">
-              <Smartphone size={14} color="#2563eb" />
-              <span>Air-Gapped Mobile Teleprompter</span>
-            </div>
-            <div className="indicator-chip">
-              <Cpu size={14} color="#7c3aed" />
-              <span>Instant Voice & Screen Question Capture</span>
+            {/* Widget Footer */}
+            <div className="widget-footer-bar">
+              <div className="widget-footer-left">
+                <Lock size={12} />
+                <span>Excluded from Zoom, Teams & Meet Video Stream</span>
+              </div>
+              <div className="widget-footer-right">
+                <span>Display: <strong>Near-Webcam Eye Contact HUD</strong></span>
+                <span>•</span>
+                <span>Companion: <strong>Air-Gapped Phone Available</strong></span>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Interactive Simulator Section */}
-      <section id="simulator" className="simulator-section">
-        <div className="section-header">
-          <div className="section-tag">Interactive Sandbox</div>
-          <h2 className="section-title">Experience Keter in Action</h2>
-          <p className="section-subtitle">
-            Select an interview question category below to see how Keter constructs real-time, bulleted STAR responses, algorithms, and system designs.
+      {/* ============================================================
+         HOW IT WORKS (PRODUCT WALKTHROUGH - 3 CLEAN STEPS)
+         ============================================================ */}
+      <section id="how-it-works" className="section-container">
+        <div className="section-head">
+          <div className="section-eyebrow">Architecture & Workflow</div>
+          <h2 className="section-h2">Engineered for Flawless Execution</h2>
+          <p className="section-desc">
+            No meeting bots joining your call, no laggy cloud relay, and zero risk of proctor detection.
           </p>
         </div>
 
-        <div className="simulator-window">
-          {/* Top Bar with Mode Controls */}
-          <div className="simulator-bar">
-            <div className="simulator-modes">
-              {Object.keys(SIMULATOR_PRESETS).map((key) => {
-                const item = SIMULATOR_PRESETS[key];
-                const isActive = activePreset === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setActivePreset(key)}
-                    className={`sim-mode-btn ${isActive ? 'active' : ''}`}
-                  >
-                    {item.title}
-                  </button>
-                );
-              })}
-            </div>
+        <div className="steps-grid">
+          <div className="step-card">
+            <div className="step-number-tag">1</div>
+            <h3 className="step-title">Direct Audio Loopback</h3>
+            <p className="step-body">
+              Keter intercepts incoming sound directly from your default Windows audio playback driver. Whether you are using AirPods or internal speakers, the audio stream is transcribed locally with zero acoustic echo.
+            </p>
           </div>
 
-          {/* Simulator Content Area */}
-          <div className="simulator-content">
-            {/* Left Question List */}
-            <div className="sim-questions-list">
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                Interviewer Audio Input:
-              </div>
+          <div className="step-card">
+            <div className="step-number-tag">2</div>
+            <h3 className="step-title">Instant Structured Prompter</h3>
+            <p className="step-body">
+              The moment the interviewer pauses, Keter analyzes your grounded resume and target JD to produce structured STAR answers, algorithmic complexities, and clean code in under 300 milliseconds.
+            </p>
+          </div>
 
-              {Object.keys(SIMULATOR_PRESETS).map((key) => {
-                const item = SIMULATOR_PRESETS[key];
-                const isActive = activePreset === key;
-                return (
-                  <div
-                    key={key}
-                    onClick={() => setActivePreset(key)}
-                    className={`sim-q-item ${isActive ? 'active' : ''}`}
-                  >
-                    <div style={{ fontSize: '11px', color: isActive ? '#2563eb' : '#64748b', fontWeight: 600 }}>
-                      {item.title}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: '12px',
-                        color: '#0f172a',
-                        marginTop: '3px',
-                        overflow: 'hidden',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                      }}
-                    >
-                      "{item.question}"
-                    </div>
-                  </div>
-                );
-              })}
+          <div className="step-card">
+            <div className="step-number-tag">3</div>
+            <h3 className="step-title">Hardware-Level Invisibility</h3>
+            <p className="step-body">
+              Using native Windows Desktop Window Manager (DWM) exclusions, Keter’s window is excluded from the OS screen capture pipeline. Share your entire desktop on Zoom or Teams with absolute peace of mind.
+            </p>
+          </div>
+        </div>
+      </section>
 
-              <div
-                style={{
-                  marginTop: 'auto',
-                  padding: '12px',
-                  borderRadius: '8px',
-                  backgroundColor: '#f1f5f9',
-                  border: '1px solid #e2e8f0',
-                  fontSize: '11px',
-                  color: '#475569',
-                  lineHeight: 1.45,
-                }}
+      {/* ============================================================
+         INTERACTIVE AUDIO LOOPBACK TESTER
+         ============================================================ */}
+      <section id="tester" className="section-container">
+        <div className="section-head">
+          <div className="section-eyebrow">Interactive Simulator</div>
+          <h2 className="section-h2">Test Audio Loopback In Real-Time</h2>
+          <p className="section-desc">
+            See how Keter's audio engine monitors sound levels to capture interviewer speech with zero threshold latency.
+          </p>
+        </div>
+
+        <div className="audio-tester-container">
+          <div className="audio-tester-left">
+            <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 6px' }}>
+              Simulate Live Call Audio Feed
+            </h3>
+            <p style={{ fontSize: '14px', color: '#475569', lineHeight: 1.5, margin: 0 }}>
+              During your interview, Keter's native loopback listener runs continuously in the background. Press the button to simulate incoming voice activity and watch the audio capture meters respond.
+            </p>
+
+            <div style={{ marginTop: '12px' }}>
+              <button
+                type="button"
+                onClick={toggleAudioTest}
+                className="btn-test-mic"
               >
-                💡 In the desktop app, speech from your speakers or headphones is captured automatically with zero manual typing required.
-              </div>
+                {isTestingAudio ? <MicOff size={15} /> : <Mic size={15} />}
+                <span>{isTestingAudio ? 'Stop Audio Simulation' : 'Start Audio Loopback Simulation'}</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="audio-tester-meter-box">
+            <div className="meter-header-row">
+              <span>Driver: <strong>Windows WASAPI Loopback</strong></span>
+              <span style={{ color: isTestingAudio ? '#059669' : '#64748b' }}>
+                {isTestingAudio ? '● Streaming Audio' : 'Standby'}
+              </span>
             </div>
 
-            {/* Right Teleprompter Stream */}
-            <div className="sim-display-area">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="meter-visualizer-bars">
+              {Array.from({ length: 24 }).map((_, i) => {
+                const threshold = (i / 24) * 100;
+                const isActive = isTestingAudio && audioLevel >= threshold;
+                const barHeight = isActive ? Math.max(8, Math.min(34, (audioLevel / 100) * 34)) : 6;
+                return (
                   <div
-                    style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: isTyping ? '#2563eb' : '#10b981',
-                    }}
+                    key={i}
+                    className={`meter-bar ${isActive ? 'active' : ''}`}
+                    style={{ height: `${barHeight}px` }}
                   />
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>
-                    {isTyping ? 'Generating AI Teleprompter Stream...' : 'AI Solution Ready'}
-                  </span>
-                </div>
+                );
+              })}
+            </div>
 
-                <span style={{ fontSize: '11px', color: '#64748b' }}>
-                  Response Latency: <strong>Instant (&lt;0.3s)</strong>
-                </span>
-              </div>
-
-              <div className="sim-teleprompter-card">
-                <div style={{ color: '#2563eb', fontWeight: 700, fontSize: '13px', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>
-                  Q: {currentPresetData.question}
-                </div>
-                <div style={{ whiteSpace: 'pre-wrap', color: '#0f172a', flex: 1, overflowY: 'auto' }}>
-                  {simText}
-                  {isTyping && <span style={{ color: '#2563eb' }}> ▋</span>}
-                </div>
-              </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#64748b' }}>
+              <span>Noise Gate: -42dB</span>
+              <span>Buffer Latency: <strong>4.2ms</strong></span>
+              <span>Status: <strong>Exclusive Capture</strong></span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stealth Matrix Comparison Section */}
-      <section id="stealth" className="stealth-matrix-section">
-        <div className="section-header">
-          <div className="section-tag">Total Anti-Detection</div>
-          <h2 className="section-title">The Stealth Matrix</h2>
-          <p className="section-subtitle">
-            Keter is engineered specifically for remote interviews where screen sharing or proctoring is active.
+      {/* ============================================================
+         STEALTH VERIFICATION TABLE
+         ============================================================ */}
+      <section id="stealth" className="section-container">
+        <div className="section-head">
+          <div className="section-eyebrow">Zero Detection Guarantee</div>
+          <h2 className="section-h2">Why Traditional Tools Get Caught</h2>
+          <p className="section-desc">
+            Browser extensions, second monitors, and meeting bot plugins are easily flagged by interview proctors.
           </p>
         </div>
 
-        <div className="stealth-grid">
-          {/* Interviewer View Card */}
-          <div className="stealth-card interviewer">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ fontSize: '15px', fontWeight: 700, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <EyeOff size={18} /> What the Interviewer Sees
-              </div>
-              <span style={{ fontSize: '10px', fontWeight: 700, color: '#dc2626', padding: '2px 8px', borderRadius: '4px', background: '#fee2e2' }}>
-                ZOOM / TEAMS / MEET
-              </span>
-            </div>
-
-            <div className="stealth-card-mockup">
-              <div style={{ textAlign: 'center', color: '#64748b' }}>
-                <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>
-                  Clean, Standard Desktop
-                </div>
-                <div style={{ fontSize: '12px', marginTop: '4px', color: '#475569', maxWidth: '320px' }}>
-                  Only your browser or code editor is visible. Keter’s window is completely excluded from the shared video buffer.
-                </div>
-              </div>
-            </div>
-
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#475569' }}>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                ✓ Zero overlay or watermarks visible on shared screen
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                ✓ Completely hidden from Windows taskbar and application switcher
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                ✓ Runs as an ordinary background system process
-              </li>
-            </ul>
-          </div>
-
-          {/* Candidate View Card */}
-          <div className="stealth-card candidate">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ fontSize: '15px', fontWeight: 700, color: '#059669', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Shield size={18} /> What You See on Your Screen
-              </div>
-              <span style={{ fontSize: '10px', fontWeight: 700, color: '#059669', padding: '2px 8px', borderRadius: '4px', background: '#ecfdf5' }}>
-                WEBCAM LEVEL HUD
-              </span>
-            </div>
-
-            <div className="stealth-card-mockup">
-              <div style={{ width: '100%', textAlign: 'left', fontFamily: 'ui-monospace, monospace', fontSize: '11px', color: '#0f172a' }}>
-                <div style={{ color: '#059669', fontWeight: 700 }}>[STAR Teleprompter Ready]</div>
-                <div>• Situation: Migration of high-load cluster...</div>
-                <div>• Action: Implemented event-driven Saga pattern...</div>
-                <div style={{ color: '#2563eb', marginTop: '4px' }}>Say: "To ensure reliability, we deployed..."</div>
-              </div>
-            </div>
-
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#475569' }}>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                ✓ Transparent HUD placed near your camera for natural eye contact
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                ✓ Air-gapped companion teleprompter on your phone off-screen
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                ✓ Emergency Panic Kill-Switch (Hit Escape to close instantly)
-              </li>
-            </ul>
-          </div>
+        <div className="stealth-table-wrapper">
+          <table className="stealth-table">
+            <thead>
+              <tr>
+                <th>Interview Scenario</th>
+                <th>Traditional AI Tools</th>
+                <th>Keter Stealth Copilot</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Full Screen Share (Zoom / Teams / Meet)</strong></td>
+                <td><span className="table-badge-risk">❌ Visible</span> Shows UI overlays in shared feed</td>
+                <td><span className="table-badge-safe">✓ 100% Invisible</span> Stripped via DWM Exclusion</td>
+              </tr>
+              <tr>
+                <td><strong>Meeting Participant List</strong></td>
+                <td><span className="table-badge-risk">❌ Flags Alert</span> Joins as third-party AI bot/plugin</td>
+                <td><span className="table-badge-safe">✓ Invisible</span> 0 bot attendees, runs purely client-side</td>
+              </tr>
+              <tr>
+                <td><strong>Headphone & Speaker Audio</strong></td>
+                <td><span className="table-badge-risk">❌ Echo Risk</span> Requires open mic or noisy speakers</td>
+                <td><span className="table-badge-safe">✓ Loopback</span> Intercepts driver audio with 0 echo</td>
+              </tr>
+              <tr>
+                <td><strong>Taskbar & Alt+Tab Switcher</strong></td>
+                <td><span className="table-badge-risk">❌ Exposed</span> Visible window thumbnail on switch</td>
+                <td><span className="table-badge-safe">✓ Stealth</span> Hidden from taskbar and Alt+Tab list</td>
+              </tr>
+              <tr>
+                <td><strong>Complex Screen Questions (Alt+S)</strong></td>
+                <td><span className="table-badge-risk">❌ Manual</span> Candidate must re-type problem statement</td>
+                <td><span className="table-badge-safe">✓ Instant OCR</span> Press Alt+S to solve diagrams & code</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
-      {/* Features Grid Section */}
-      <section id="features" className="features-section">
-        <div className="section-header">
-          <div className="section-tag">Engineered for Technical Mastery</div>
-          <h2 className="section-title">Everything Needed to Pass Any Round</h2>
+      {/* ============================================================
+         FEATURES GRID
+         ============================================================ */}
+      <section className="section-container">
+        <div className="section-head">
+          <div className="section-eyebrow">Comprehensive Toolkit</div>
+          <h2 className="section-h2">Engineered for Technical Rounds</h2>
         </div>
 
         <div className="features-grid">
           <div className="feature-box">
             <div className="feature-icon-wrapper">
-              <Volume2 size={20} />
+              <Volume2 size={18} />
             </div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
-              Direct System Audio Capture
-            </div>
-            <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+            <h4 className="feature-heading">System Audio Loopback</h4>
+            <p className="feature-body">
               Transcribes interviewer speech cleanly from your system audio, eliminating background noise or room echo.
-            </div>
+            </p>
           </div>
 
           <div className="feature-box">
             <div className="feature-icon-wrapper">
-              <Cpu size={20} />
+              <Cpu size={18} />
             </div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
-              Instant Screen Capture
-            </div>
-            <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+            <h4 className="feature-heading">Instant Screen Capture (Alt+S)</h4>
+            <p className="feature-body">
               Press Alt+S to instantly capture complex coding questions, diagrams, or problem statements from any interview tab.
-            </div>
+            </p>
           </div>
 
           <div className="feature-box">
             <div className="feature-icon-wrapper">
-              <Folder size={20} />
+              <Folder size={18} />
             </div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
-              Isolated Project Sessions
-            </div>
-            <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
-              Each interview has its own dedicated JD, resume context, mode, and chat history. Never mix company contexts.
-            </div>
+            <h4 className="feature-heading">Isolated Project Workspaces</h4>
+            <p className="feature-body">
+              Each company interview has its own dedicated JD, resume context, mode, and history. Never mix company contexts.
+            </p>
           </div>
 
           <div className="feature-box">
             <div className="feature-icon-wrapper">
-              <Lock size={20} />
+              <Lock size={18} />
             </div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
-              100% Client-Side Privacy
-            </div>
-            <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+            <h4 className="feature-heading">100% Client-Side Privacy</h4>
+            <p className="feature-body">
               Zero audio is ever stored on external servers. All speech-to-text and AI prompt context remain strictly under your control.
-            </div>
+            </p>
           </div>
 
           <div className="feature-box">
             <div className="feature-icon-wrapper">
-              <Monitor size={20} />
+              <Smartphone size={18} />
             </div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
-              Live P2P Screen Mirroring
-            </div>
-            <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
-              Watch coding problems and IDE code live on your phone with zero server lag. Pure P2P streaming over local Wi-Fi and WebRTC.
-            </div>
+            <h4 className="feature-heading">Air-Gapped Mobile Teleprompter</h4>
+            <p className="feature-body">
+              Scan a QR code from any phone. Mount phone under your webcam for natural eye contact with zero app install needed.
+            </p>
           </div>
 
           <div className="feature-box">
             <div className="feature-icon-wrapper">
-              <Smartphone size={20} />
+              <Zap size={18} />
             </div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>
-              Air-Gapped Mobile Teleprompter
-            </div>
-            <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
-              Scan a QR code from any iPhone or Android phone. Mount phone under your webcam for 100% natural eye contact with zero app install.
-            </div>
+            <h4 className="feature-heading">Emergency Panic Hide (Esc)</h4>
+            <p className="feature-body">
+              Press Escape or Ctrl+Shift+X at any time to instantly kill all overlays and clear your screen in less than 50ms.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Pricing Section (1st Free, then ₹99 per Project) */}
-      <section id="pricing" className="pricing-section">
-        <div className="section-header">
-          <div className="section-tag">Simple & Transparent Pricing</div>
-          <h2 className="section-title">Zero Monthly Subscription Traps</h2>
-          <p className="section-subtitle">
-            Other tools charge $60–$100 every single month even when you aren't interviewing. Keter gives you your first interview session 100% free, then single 24-hour passes for just ₹99.
+      {/* ============================================================
+         PRICING SECTION
+         ============================================================ */}
+      <section id="pricing" className="section-container">
+        <div className="section-head">
+          <div className="section-eyebrow">Fair & Transparent</div>
+          <h2 className="section-h2">Zero Monthly Subscription Traps</h2>
+          <p className="section-desc">
+            Other tools charge $60–$100 every single month even when you aren't interviewing. Keter gives you your first session 100% free, then single 24-hour passes for just ₹99.
           </p>
         </div>
 
-        <div className="pricing-grid">
+        <div className="pricing-cards-container">
           {/* Free 1st Project Card */}
           <div className="pricing-card">
             <div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: '#059669' }}>First Interview Project</div>
-              <div style={{ fontSize: '34px', fontWeight: 800, color: '#0f172a', marginTop: '6px' }}>
-                ₹0 <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>/ 1st project</span>
+              <div className="pricing-plan-name">First Interview Project</div>
+              <div className="pricing-amount">
+                ₹0 <span className="pricing-unit">/ 1st project</span>
               </div>
-              <div style={{ fontSize: '13px', color: '#475569', marginTop: '8px', lineHeight: 1.5 }}>
-                100% free trial. Test your audio loopback, connect your phone teleprompter, and ace your initial interview round.
-              </div>
+              <p style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5, margin: '8px 0 0' }}>
+                Complete trial. Test your audio loopback, connect your mobile teleprompter, and ace your initial interview round.
+              </p>
 
               <div style={{ height: '1px', background: '#e2e8f0', margin: '20px 0' }} />
 
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#334155' }}>
-                <li>✓ <strong>1 Full 24-Hour Interview Project</strong></li>
-                <li>✓ <strong>No credit card or payment required</strong></li>
-                <li>✓ STAR, Technical & System Design Modes</li>
-                <li>✓ Instant Screen Question Capture (Alt+S)</li>
-                <li>✓ Air-Gapped Mobile Phone Teleprompter</li>
-                <li>✓ 100% Invisible on Zoom / Teams / Meet</li>
+              <ul className="pricing-bullets-list">
+                <li><CheckCircle size={15} color="#059669" /> 1 Full 24-Hour Interview Project</li>
+                <li><CheckCircle size={15} color="#059669" /> No credit card or payment required</li>
+                <li><CheckCircle size={15} color="#059669" /> STAR, Technical & System Design Modes</li>
+                <li><CheckCircle size={15} color="#059669" /> Instant Screen Question Capture (Alt+S)</li>
+                <li><CheckCircle size={15} color="#059669" /> 100% Invisible on Zoom / Teams / Meet</li>
               </ul>
             </div>
 
-            <button type="button" onClick={handleDownload} className="btn-ghost-cyan" style={{ justifyContent: 'center', width: '100%', marginTop: '20px' }}>
+            <button type="button" onClick={handleDownload} className="btn-cta-secondary" style={{ justifyContent: 'center', width: '100%' }}>
               <Download size={14} /> Download & Start Free
             </button>
           </div>
 
           {/* Featured ₹99 Session Pass */}
           <div className="pricing-card featured">
-            <div className="pricing-card-badge">Most Popular • Pay-As-You-Interview</div>
+            <div className="pricing-pill-badge">Most Popular • Pay As You Interview</div>
             <div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: '#2563eb' }}>Additional Project Passes</div>
-              <div style={{ fontSize: '34px', fontWeight: 800, color: '#0f172a', marginTop: '6px' }}>
-                ₹99 <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>/ 24h pass</span>
+              <div className="pricing-plan-name" style={{ color: '#2563eb' }}>Additional Project Passes</div>
+              <div className="pricing-amount">
+                ₹99 <span className="pricing-unit">/ 24h pass</span>
               </div>
-              <div style={{ fontSize: '13px', color: '#475569', marginTop: '8px', lineHeight: 1.5 }}>
-                Buy only when you have an interview scheduled. Timer starts only when you hit Activate.
-              </div>
+              <p style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5, margin: '8px 0 0' }}>
+                Buy only when you have an interview scheduled. Timer starts only when you click Activate.
+              </p>
 
               <div style={{ height: '1px', background: '#e2e8f0', margin: '20px 0' }} />
 
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#334155' }}>
-                <li>✓ <strong>1 Dedicated 24h Interview Session Pass</strong></li>
-                <li>✓ <strong>Timer starts ONLY when activated</strong></li>
-                <li>✓ <strong>Unactivated passes never expire</strong></li>
-                <li>✓ Isolated JD Context & Resume Grounding</li>
-                <li>✓ 100% Invisible on Screen Share (Zoom/Teams/Meet)</li>
-                <li>✓ Unlimited Real-Time AI Generation</li>
-                <li>✓ Instant Razorpay UPI (GPay, PhonePe, Paytm, Cards)</li>
+              <ul className="pricing-bullets-list">
+                <li><CheckCircle size={15} color="#2563eb" /> 1 Dedicated 24h Interview Session Pass</li>
+                <li><CheckCircle size={15} color="#2563eb" /> Timer starts ONLY when activated</li>
+                <li><CheckCircle size={15} color="#2563eb" /> Unactivated passes never expire</li>
+                <li><CheckCircle size={15} color="#2563eb" /> Isolated JD Context & Resume Grounding</li>
+                <li><CheckCircle size={15} color="#2563eb" /> Instant Razorpay UPI (GPay, PhonePe, Paytm)</li>
               </ul>
             </div>
 
-            <button type="button" onClick={handleDownload} className="btn-primary-gradient" style={{ justifyContent: 'center', width: '100%', marginTop: '20px' }}>
+            <button type="button" onClick={handleDownload} className="btn-cta-primary" style={{ justifyContent: 'center', width: '100%' }}>
               <Download size={14} /> Download for Windows
             </button>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section id="faq" className="faq-section">
-        <div className="section-header">
-          <div className="section-tag">Got Questions?</div>
-          <h2 className="section-title">Frequently Asked Questions</h2>
+      {/* ============================================================
+         FAQ SECTION
+         ============================================================ */}
+      <section id="faq" className="section-container">
+        <div className="section-head">
+          <div className="section-eyebrow">FAQ</div>
+          <h2 className="section-h2">Frequently Asked Questions</h2>
         </div>
 
         <div className="faq-list">
@@ -885,89 +727,63 @@ export function LandingPage() {
               <div key={idx} className="faq-item">
                 <button
                   type="button"
-                  className="faq-question"
+                  className="faq-toggle-btn"
                   onClick={() => setExpandedFaq(isExpanded ? null : idx)}
                 >
                   <span>{item.q}</span>
                   {isExpanded ? <ChevronUp size={16} color="#2563eb" /> : <ChevronDown size={16} color="#64748b" />}
                 </button>
-                {isExpanded && <div className="faq-answer">{item.a}</div>}
+                {isExpanded && <div className="faq-answer-pane">{item.a}</div>}
               </div>
             );
           })}
         </div>
       </section>
 
-      {/* Final Download CTA Banner */}
-      <section id="download" className="cta-banner">
-        <div className="cta-banner-inner">
-          <h2 style={{ fontSize: '34px', fontWeight: 800, color: '#ffffff', marginBottom: '12px', letterSpacing: '-0.02em' }}>
+      {/* ============================================================
+         FINAL CTA BANNER
+         ============================================================ */}
+      <section className="cta-banner-wrapper">
+        <div className="cta-box">
+          <h2 className="cta-heading">
             Your Dream Offer is One Interview Away.
           </h2>
-          <p style={{ fontSize: '15px', color: '#94a3b8', maxWidth: '600px', margin: '0 auto 24px', lineHeight: 1.6 }}>
-            Join software engineers and product leaders using Keter to interview with total confidence.
+          <p className="cta-sub">
+            Join engineers and engineering leaders using Keter to interview with total confidence.
           </p>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
+          <div>
             <button
               type="button"
               onClick={handleDownload}
-              style={{
-                background: '#ffffff',
-                color: '#0f172a',
-                padding: '13px 26px',
-                borderRadius: '8px',
-                fontSize: '14px',
-                fontWeight: 700,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                border: 'none',
-                cursor: 'pointer',
-              }}
+              className="btn-cta-white"
             >
               <Download size={16} />
               <span>Download Keter for Windows (.exe)</span>
             </button>
           </div>
 
-          <div style={{ fontSize: '11px', color: '#64748b', marginTop: '16px' }}>
-            Windows 10 / 11 (64-bit) • Size: ~65 MB • Instant Stealth Setup
+          <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '16px' }}>
+            Windows 10 / 11 (64-bit) • Size: ~65 MB • Instant Setup
           </div>
         </div>
-      </section>
 
-      {/* Contact Section */}
-      <section id="contact" style={{ padding: '40px 24px 20px', maxWidth: '780px', margin: '0 auto', textAlign: 'center' }}>
-        <div className="contact-section-inner">
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '4px 12px',
-            borderRadius: '16px',
-            background: '#eff6ff',
-            border: '1px solid #dbeafe',
-            color: '#2563eb',
-            fontSize: '11px',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            marginBottom: '14px'
-          }}>
-            <Mail size={13} /> Official Support & Inquiries
+        {/* Contact Section */}
+        <div className="contact-strip">
+          <div style={{ fontSize: '12px', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            Official Support & Inquiries
           </div>
-          <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', margin: '0 0 8px' }}>
-            Get in Touch With Our Team
-          </h2>
-          <p style={{ color: '#475569', fontSize: '14px', maxWidth: '540px', margin: '0 auto 20px', lineHeight: 1.5 }}>
-            Have questions about Keter, need custom setup assistance for an upcoming interview, or have general business inquiries? Reach out anytime:
+          <h4 style={{ fontSize: '18px', fontWeight: 800, margin: '6px 0', color: '#0f172a' }}>
+            Need Custom Setup or Have Questions?
+          </h4>
+          <p style={{ fontSize: '13px', color: '#475569', margin: '0 auto', maxWidth: '480px' }}>
+            Our engineering team is available 24/7 to assist with interview preparation and audio setup:
           </p>
           <a
             href="mailto:keterai26@gmail.com?subject=Keter%20AI%20Inquiry%20/%20Support"
-            className="contact-email-btn"
+            className="contact-email-link"
           >
-            <Mail size={16} />
+            <Mail size={14} />
             <span>keterai26@gmail.com</span>
           </a>
         </div>
