@@ -193,8 +193,13 @@ export function LandingPage() {
 
   const handleDownload = (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    const downloadUrl = import.meta.env.VITE_DOWNLOAD_URL || 'https://github.com/anil-manal/keter/releases/download/v1.0.0/Keter.exe';
+    const downloadUrl = import.meta.env.VITE_DOWNLOAD_URL || 'https://github.com/anil-manal/keter/releases/download/v1.0.0/Keter-Setup.exe';
     window.location.href = downloadUrl;
+  };
+
+  const handleDownloadZip = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    window.location.href = 'https://github.com/anil-manal/keter/releases/download/v1.0.0/Keter-Windows-v1.0.0.zip';
   };
 
   return (
@@ -261,13 +266,16 @@ export function LandingPage() {
         <div className="hero-cta-row">
           <button type="button" onClick={handleDownload} className="btn-primary-black">
             <Download size={16} />
-            <span>Download Keter for Windows (.exe)</span>
+            <span>Download Keter Installer (.exe)</span>
           </button>
 
           <button type="button" onClick={() => scrollTo('screen-proof')} className="btn-secondary-white">
             <Eye size={15} color="#0284c7" />
             <span>View Screen Share Invisibility Proof</span>
           </button>
+        </div>
+        <div style={{ marginTop: '10px', fontSize: '12px', color: '#71717a' }}>
+          Verified Clean Inno Setup • Prefer standalone? <button type="button" onClick={handleDownloadZip} style={{ background: 'none', border: 'none', padding: 0, color: '#0284c7', textDecoration: 'underline', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>Download Portable .zip</button>
         </div>
 
         <div className="hero-specs-row">
@@ -757,12 +765,33 @@ export function LandingPage() {
               }}
             >
               <Download size={16} />
-              <span>Download Keter for Windows (.exe)</span>
+              <span>Download Keter Installer (.exe)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDownloadZip}
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                color: '#ffffff',
+                padding: '13px 22px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                cursor: 'pointer',
+              }}
+            >
+              <Download size={16} />
+              <span>Download Portable (.zip)</span>
             </button>
           </div>
 
           <div style={{ fontSize: '11px', color: '#71717a', marginTop: '16px' }}>
-            Windows 10 / 11 (64-bit) • Size: ~65 MB • Instant Setup
+            Windows 10 / 11 (64-bit) • Verified Clean Setup • Instant Installation
           </div>
         </div>
 
