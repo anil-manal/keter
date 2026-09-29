@@ -221,32 +221,6 @@ export function LandingPage({ onOpenApp }) {
         </div>
 
         <div className="landing-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <a
-            href="/?view=app"
-            onClick={(e) => {
-              if (onOpenApp) {
-                e.preventDefault();
-                onOpenApp();
-              }
-            }}
-            style={{
-              fontSize: '13px',
-              padding: '7px 14px',
-              borderRadius: '8px',
-              color: '#38bdf8',
-              background: 'rgba(56, 189, 248, 0.08)',
-              border: '1px solid rgba(56, 189, 248, 0.3)',
-              textDecoration: 'none',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            Launch Web App <ExternalLink size={12} />
-          </a>
           <button type="button" onClick={handleDownload} className="btn-primary-gradient">
             <Download size={14} /> Download for Windows
           </button>

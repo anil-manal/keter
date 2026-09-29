@@ -1699,14 +1699,11 @@ class ErrorBoundary extends React.Component {
 export default function App() {
   const urlParams = new URLSearchParams(window.location.search);
   const isCompanionMode = urlParams.get('mode') === 'companion';
-  const urlView = urlParams.get('view');
   const isElectron = !!(window.electronAPI);
 
   // In Electron desktop app: always default to 'app' HUD.
-  // In standard web browser (localhost:5188): default to 'landing' unless ?view=app.
+  // On public web: always default to 'landing' marketing & download page (or companion mode for mobile teleprompter).
   const [currentView, setCurrentView] = useState(() => {
-    if (urlView === 'landing') return 'landing';
-    if (urlView === 'app') return 'app';
     return isElectron ? 'app' : 'landing';
   });
 
@@ -1714,8 +1711,8 @@ export default function App() {
     <ErrorBoundary>
       {isCompanionMode ? (
         <CompanionView />
-      ) : currentView === 'landing' ? (
-        <LandingPage onOpenApp={() => setCurrentView('app')} />
+      ) : currentView === 'landing' || !isElectron ? (
+        <LandingPage />
       ) : (
         <KeterHUD onOpenLanding={() => setCurrentView('landing')} />
       )}
