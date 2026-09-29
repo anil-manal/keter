@@ -10,12 +10,8 @@ async function buildInstaller() {
   const serviceIcon = path.join(rootDir, 'electron', 'service_host.ico');
   const isccExe = path.join(rootDir, 'node_modules', 'innosetup-compiler', 'bin', 'ISCC.exe');
 
-  if (!fs.existsSync(portableDir)) {
-    console.log('[1/3] Packaging portable build with system service icon...');
-    await packageWindows();
-  } else {
-    console.log('[1/3] Using existing portable build...');
-  }
+  console.log('[1/3] Packaging fresh Windows build with latest UI bundle...');
+  await packageWindows();
 
   console.log('[2/3] Generating Inno Setup configuration (1-Click Instant Install)...');
   const issContent = `
