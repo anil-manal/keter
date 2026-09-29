@@ -1,0 +1,38 @@
+{
+  "name": "audio-core-host",
+  "version": "1.0.0",
+  "description": "Windows Audio Core Host",
+  "main": "electron/main.cjs",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "npm run build && node electron/launcher.cjs",
+    "app": "npm run build && node electron/launcher.cjs",
+    "package:win": "node scripts/package-windows.cjs",
+    "build:installer": "node scripts/build-installer.cjs",
+    "dev:app": "concurrently -k \"vite\" \"wait-on tcp:5173 && node electron/launcher.cjs\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.1",
+    "clsx": "^2.1.1",
+    "koffi": "^3.3.2",
+    "localtunnel": "^2.0.2",
+    "lucide-react": "^1.16.0",
+    "mqtt": "^5.16.0",
+    "peerjs": "^1.5.5",
+    "qrcode": "^1.5.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "electron": "^34.2.0",
+    "innosetup-compiler": "^6.3.1",
+    "rcedit": "^5.0.2",
+    "vite": "^6.2.0",
+    "wait-on": "^8.0.2"
+  }
+}

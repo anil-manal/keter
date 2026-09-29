@@ -1,0 +1,2 @@
+Keter Copilot - Windows 10/11 64-bit Installer
+Place your compiled Keter-Setup.exe here for direct web downloads.
