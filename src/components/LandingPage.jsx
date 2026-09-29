@@ -193,13 +193,13 @@ export function LandingPage() {
 
   const handleDownload = (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    const downloadUrl = import.meta.env.VITE_DOWNLOAD_URL || 'https://github.com/anil-manal/keter/releases/download/v1.0.0/Keter.exe';
+    const downloadUrl = import.meta.env.VITE_DOWNLOAD_URL || 'https://github.com/anil-manal/keter/releases/download/v1.0.0/Keter-Windows-v1.0.0.zip';
     window.location.href = downloadUrl;
   };
 
-  const handleDownloadZip = (e) => {
+  const handleDownloadExe = (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    window.location.href = 'https://github.com/anil-manal/keter/releases/download/v1.0.0/Keter-Windows-v1.0.0.zip';
+    window.location.href = 'https://github.com/anil-manal/keter/releases/download/v1.0.0/Keter.exe';
   };
 
   return (
@@ -242,7 +242,7 @@ export function LandingPage() {
 
         <div>
           <button type="button" onClick={handleDownload} className="btn-nav-download">
-            <Download size={13} /> Download for Windows
+            <Download size={13} /> Download Portable (.zip)
           </button>
         </div>
       </nav>
@@ -266,7 +266,7 @@ export function LandingPage() {
         <div className="hero-cta-row">
           <button type="button" onClick={handleDownload} className="btn-primary-black">
             <Download size={16} />
-            <span>Download Keter for Windows (.exe)</span>
+            <span>Download Portable Keter (.zip)</span>
           </button>
 
           <button type="button" onClick={() => scrollTo('screen-proof')} className="btn-secondary-white">
@@ -275,7 +275,7 @@ export function LandingPage() {
           </button>
         </div>
         <div style={{ marginTop: '10px', fontSize: '12px', color: '#71717a' }}>
-          Instant 1-Click Launch • Zero wizard questions • Or get <button type="button" onClick={handleDownloadZip} style={{ background: 'none', border: 'none', padding: 0, color: '#0284c7', textDecoration: 'underline', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>Portable .zip</button>
+          100% Zero-Install • Never appears in Control Panel or Add/Remove Programs • Or get <button type="button" onClick={handleDownloadExe} style={{ background: 'none', border: 'none', padding: 0, color: '#0284c7', textDecoration: 'underline', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>Single .exe</button>
         </div>
 
         <div className="hero-specs-row">
@@ -765,12 +765,12 @@ export function LandingPage() {
               }}
             >
               <Download size={16} />
-              <span>Download Keter for Windows (.exe)</span>
+              <span>Download Portable Keter (.zip)</span>
             </button>
 
             <button
               type="button"
-              onClick={handleDownloadZip}
+              onClick={handleDownloadExe}
               style={{
                 background: 'rgba(255,255,255,0.08)',
                 color: '#ffffff',
@@ -786,12 +786,12 @@ export function LandingPage() {
               }}
             >
               <Download size={16} />
-              <span>Download Portable (.zip)</span>
+              <span>Download Single .exe (Stealth)</span>
             </button>
           </div>
 
           <div style={{ fontSize: '11px', color: '#71717a', marginTop: '16px' }}>
-            Windows 10 / 11 (64-bit) • Verified Clean Setup • Instant Installation
+            Windows 10 / 11 (64-bit) • 100% Zero-Install • Never registers in Control Panel or Add/Remove Programs
           </div>
         </div>
 

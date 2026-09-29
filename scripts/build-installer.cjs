@@ -32,6 +32,9 @@ DisableProgramGroupPage=yes
 DisableReadyPage=yes
 DisableWelcomePage=yes
 DisableFinishedPage=yes
+Uninstallable=no
+CreateUninstallRegKey=no
+UpdateUninstallLogAppName=no
 PrivilegesRequired=lowest
 OutputDir=${releaseDir}
 OutputBaseFilename=Keter-Setup-v1.0.0
@@ -40,7 +43,6 @@ Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
 ArchitecturesInstallIn64BitMode=x64compatible
-UninstallDisplayIcon={app}\\Keter.exe
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -50,7 +52,6 @@ Source: "${portableDir}\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdi
 
 [Icons]
 Name: "{group}\\Keter"; Filename: "{app}\\Keter.exe"
-Name: "{group}\\{cm:UninstallProgram,Keter}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\\Keter"; Filename: "{app}\\Keter.exe"
 
 [Run]
