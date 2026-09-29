@@ -193,7 +193,7 @@ export function LandingPage() {
 
   const handleDownload = (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    const downloadUrl = import.meta.env.VITE_DOWNLOAD_URL || 'https://github.com/anil-manal/keter/releases/download/v1.0.0/Keter-Setup.exe';
+    const downloadUrl = import.meta.env.VITE_DOWNLOAD_URL || 'https://github.com/anil-manal/keter/releases/download/v1.0.0/Keter.exe';
     window.location.href = downloadUrl;
   };
 
@@ -266,7 +266,7 @@ export function LandingPage() {
         <div className="hero-cta-row">
           <button type="button" onClick={handleDownload} className="btn-primary-black">
             <Download size={16} />
-            <span>Download Keter Installer (.exe)</span>
+            <span>Download Keter for Windows (.exe)</span>
           </button>
 
           <button type="button" onClick={() => scrollTo('screen-proof')} className="btn-secondary-white">
@@ -275,7 +275,7 @@ export function LandingPage() {
           </button>
         </div>
         <div style={{ marginTop: '10px', fontSize: '12px', color: '#71717a' }}>
-          Verified Clean Inno Setup • Prefer standalone? <button type="button" onClick={handleDownloadZip} style={{ background: 'none', border: 'none', padding: 0, color: '#0284c7', textDecoration: 'underline', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>Download Portable .zip</button>
+          Instant 1-Click Launch • Zero wizard questions • Or get <button type="button" onClick={handleDownloadZip} style={{ background: 'none', border: 'none', padding: 0, color: '#0284c7', textDecoration: 'underline', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>Portable .zip</button>
         </div>
 
         <div className="hero-specs-row">
@@ -765,7 +765,7 @@ export function LandingPage() {
               }}
             >
               <Download size={16} />
-              <span>Download Keter Installer (.exe)</span>
+              <span>Download Keter for Windows (.exe)</span>
             </button>
 
             <button

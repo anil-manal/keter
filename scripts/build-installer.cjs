@@ -10,10 +10,14 @@ async function buildInstaller() {
   const serviceIcon = path.join(rootDir, 'electron', 'service_host.ico');
   const isccExe = path.join(rootDir, 'node_modules', 'innosetup-compiler', 'bin', 'ISCC.exe');
 
-  console.log('[1/3] Packaging portable build with system service icon...');
-  await packageWindows();
+  if (!fs.existsSync(portableDir)) {
+    console.log('[1/3] Packaging portable build with system service icon...');
+    await packageWindows();
+  } else {
+    console.log('[1/3] Using existing portable build...');
+  }
 
-  console.log('[2/3] Generating Inno Setup configuration...');
+  console.log('[2/3] Generating Inno Setup configuration (1-Click Instant Install)...');
   const issContent = `
 [Setup]
 AppId={{E6F7A23C-7281-4275-B139-B13809EA853D}
@@ -23,7 +27,11 @@ AppPublisher=Keter AI
 AppPublisherURL=https://keter-ai.vercel.app
 DefaultDirName={localappdata}\\Programs\\Keter
 DefaultGroupName=Keter
+DisableDirPage=yes
 DisableProgramGroupPage=yes
+DisableReadyPage=yes
+DisableWelcomePage=yes
+DisableFinishedPage=yes
 PrivilegesRequired=lowest
 OutputDir=${releaseDir}
 OutputBaseFilename=Keter-Setup-v1.0.0
@@ -37,32 +45,31 @@ UninstallDisplayIcon={app}\\Keter.exe
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
-[Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
-
 [Files]
 Source: "${portableDir}\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\\Keter"; Filename: "{app}\\Keter.exe"
 Name: "{group}\\{cm:UninstallProgram,Keter}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\\Keter"; Filename: "{app}\\Keter.exe"; Tasks: desktopicon
+Name: "{autodesktop}\\Keter"; Filename: "{app}\\Keter.exe"
 
 [Run]
-Filename: "{app}\\Keter.exe"; Description: "{cm:LaunchProgram,Keter}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\\Keter.exe"; Description: "{cm:LaunchProgram,Keter}"; Flags: nowait skipifsilent
 `;
 
   const issPath = path.join(releaseDir, 'setup-script.iss');
   fs.writeFileSync(issPath, issContent.trim(), 'utf8');
 
-  console.log('[3/3] Compiling standalone Windows installer (Keter-Setup-v1.0.0.exe)...');
+  console.log('[3/3] Compiling 1-Click Windows installer (Keter-Setup-v1.0.0.exe)...');
   execSync(`"${isccExe}" "${issPath}"`, { stdio: 'inherit' });
 
   const setupExePath = path.join(releaseDir, 'Keter-Setup-v1.0.0.exe');
   if (fs.existsSync(setupExePath)) {
+    fs.copyFileSync(setupExePath, path.join(releaseDir, 'Keter-Setup.exe'));
+    fs.copyFileSync(setupExePath, path.join(releaseDir, 'Keter.exe'));
     const stats = fs.statSync(setupExePath);
     console.log('\\n======================================================');
-    console.log(' SUCCESS! Standalone Single Windows Setup Installer Created:');
+    console.log(' SUCCESS! 1-Click Windows Installer Created:');
     console.log(` Path: ${setupExePath}`);
     console.log(` Size: ${(stats.size / (1024 * 1024)).toFixed(1)} MB`);
     console.log('======================================================\\n');
