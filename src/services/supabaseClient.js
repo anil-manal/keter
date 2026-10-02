@@ -192,3 +192,103 @@ export function broadcastToRoomChannel(channel, message) {
     console.warn('[Supabase Realtime] Broadcast failed:', err.message);
   }
 }
+
+// Sync User Profile & Passes to Supabase Cloud
+export async function syncUserProfileToCloud(profile) {
+  if (!profile) return null;
+  const client = getSupabase();
+  if (!client) return profile;
+
+  try {
+    const payload = {
+      id: profile.id,
+      email: profile.email,
+      name: profile.name || (profile.email ? profile.email.split('@')[0] : 'Candidate'),
+      plan: profile.plan || 'free_trial',
+      is_pro: !!profile.is_pro,
+      passes_count: profile.passes_count || 1,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data, error } = await client
+      .from('profiles')
+      .upsert(payload, { onConflict: 'id' })
+      .select()
+      .single();
+
+    if (!error && data) {
+      localStorage.setItem('keter_user_profile', JSON.stringify({ ...profile, ...data }));
+      return data;
+    }
+  } catch (err) {
+    console.warn('[Supabase Cloud Sync] Profile sync warning:', err.message);
+  }
+  return profile;
+}
+
+// Record Payment Transaction to Supabase Cloud
+export async function recordPaymentToCloud({
+  userEmail,
+  paymentId,
+  amount,
+  voucherApplied,
+  projectTitle,
+}) {
+  const client = getSupabase();
+  if (!client) return null;
+
+  try {
+    const payload = {
+      payment_id: paymentId,
+      user_email: userEmail || 'guest@candidate.com',
+      amount: amount || 0,
+      voucher_applied: voucherApplied || null,
+      project_title: projectTitle || 'Interview Session',
+      created_at: new Date().toISOString(),
+    };
+
+    const { data, error } = await client
+      .from('payments')
+      .insert(payload);
+
+    if (error) {
+      console.warn('[Supabase Cloud Payment] Payment record note:', error.message);
+    }
+    return data;
+  } catch (err) {
+    console.warn('[Supabase Cloud Payment] Payment record failed:', err.message);
+    return null;
+  }
+}
+
+// Sync Interview Project Session to Supabase Cloud
+export async function syncProjectToCloud(project, userEmail) {
+  if (!project) return null;
+  const client = getSupabase();
+  if (!client) return project;
+
+  try {
+    const payload = {
+      id: project.id,
+      user_email: userEmail || 'guest@candidate.com',
+      title: project.title,
+      target_role: project.targetRole || '',
+      status: project.status || 'unactivated',
+      paid_amount: project.paidAmount || 99,
+      payment_id: project.paymentId || null,
+      created_at: new Date(project.createdAt || Date.now()).toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error } = await client
+      .from('projects')
+      .upsert(payload, { onConflict: 'id' });
+
+    if (error) {
+      console.warn('[Supabase Cloud Project] Project sync note:', error.message);
+    }
+  } catch (err) {
+    console.warn('[Supabase Cloud Project] Project sync warning:', err.message);
+  }
+  return project;
+}

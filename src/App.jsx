@@ -39,7 +39,7 @@ import { ProjectConfigModal } from './components/ProjectConfigModal';
 import { getOrCreateRoomId } from './services/pairingService';
 import { initHostPeer } from './services/peerRelayService';
 import { createCloudRelay } from './services/cloudRelayService';
-import { subscribeToRoomChannel, broadcastToRoomChannel, getActiveUser, getUserProfile } from './services/supabaseClient';
+import { subscribeToRoomChannel, broadcastToRoomChannel, getActiveUser, getUserProfile, syncProjectToCloud, recordPaymentToCloud, syncUserProfileToCloud } from './services/supabaseClient';
 import { audioCaptureManager } from './services/audioCapture';
 import { STTService } from './services/sttService';
 import { streamLLMResponse, streamVisionResponse, reconstructQuestionFromScreens } from './services/llmService';
@@ -281,6 +281,15 @@ function KeterHUD({ onOpenLanding }) {
       setActiveProjectIdState(res.project.id);
       setMessages([]);
       setSttStatusMessage(`🎉 Payment of ₹${PROJECT_COST_INR} via Razorpay confirmed! Session "${res.project.title}" ready to configure & activate.`);
+
+      // Sync payment and pass project to Supabase Cloud Database
+      recordPaymentToCloud({
+        userEmail: userProfile?.email,
+        paymentId,
+        amount: res.project.paidAmount,
+        projectTitle: title,
+      });
+      syncProjectToCloud(res.project, userProfile?.email);
     }
   };
 
